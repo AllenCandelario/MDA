@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35707.178
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MDA", "MDA\MDA.csproj", "{724AC963-A9D6-4C84-843C-D0F9E751D25D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MDA.App", "MDA.App\MDA.App.csproj", "{DA66340C-AE9E-4539-8120-6B1C5B7AB994}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IBKR.API", "IBKR.API\IBKR.API.csproj", "{3837FD94-C36D-4DA4-8AD5-1ED1204F4C72}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{724AC963-A9D6-4C84-843C-D0F9E751D25D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{724AC963-A9D6-4C84-843C-D0F9E751D25D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{724AC963-A9D6-4C84-843C-D0F9E751D25D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{724AC963-A9D6-4C84-843C-D0F9E751D25D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA66340C-AE9E-4539-8120-6B1C5B7AB994}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA66340C-AE9E-4539-8120-6B1C5B7AB994}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA66340C-AE9E-4539-8120-6B1C5B7AB994}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA66340C-AE9E-4539-8120-6B1C5B7AB994}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3837FD94-C36D-4DA4-8AD5-1ED1204F4C72}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3837FD94-C36D-4DA4-8AD5-1ED1204F4C72}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3837FD94-C36D-4DA4-8AD5-1ED1204F4C72}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3837FD94-C36D-4DA4-8AD5-1ED1204F4C72}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
