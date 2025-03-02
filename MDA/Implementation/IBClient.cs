@@ -1,11 +1,5 @@
 ﻿using IBApi;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using System.Reflection.Metadata.Ecma335;
 
 namespace MDA.Implementation
 {
@@ -24,8 +18,9 @@ namespace MDA.Implementation
             _signal = new EReaderMonitorSignal();
             _clientSocket = new EClientSocket(this, _signal);
 
-            // Default to standard localhost connection if environment variables are not available
+            #region Default to standard localhost connection if environment variables are not available
             _host = configuration.GetSection("IBKRConfig:Host").Value ?? "127.0.0.1";
+            
             if (!int.TryParse(configuration.GetSection("IBKRConfig:Port").Value, out _port))
             {
                 _port = 4001;
@@ -35,14 +30,14 @@ namespace MDA.Implementation
             {
                 _clientId = 0;
             }
+            #endregion
         }
 
         public void InitiateConnection()
         {
-            // Maybe retrieve the _configuration stuff here instad of hardcoding
             _clientSocket.eConnect(_host, _port, _clientId);
 
-            //Create a reader to consume messages from the TWS. The EReader will consume the incoming messages and put them in a queue
+            // Create a reader to consume messages from the TWS. The EReader will consume the incoming messages and put them in a queue
             var reader = new EReader(_clientSocket, _signal);
             reader.Start();
             
@@ -75,7 +70,12 @@ namespace MDA.Implementation
 
         public void error(int id, int errorCode, string errorMsg, string advancedOrderRejectJson)
         {
-            Console.WriteLine($"IBKR error:\nid: {id}\nerrorCode: {errorCode}\nerrorMsg: {errorMsg}\nadvancedOrderRejectJson: {advancedOrderRejectJson}");
+            Console.WriteLine($"IBKR error - id: {id}, errorCode: {errorCode}, errorMsg: {errorMsg}, advancedOrderRejectJson: {advancedOrderRejectJson}");
+        }
+
+        public void connectAck()
+        {
+            Console.WriteLine("Connection Acknowledged");
         }
     }
 }
