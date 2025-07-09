@@ -9,12 +9,6 @@ namespace MDA.Implementation
             _ = inputs;
         }
 
-        public void error(string str)
-        {
-            DiscardImplementation(str);
-            throw new NotImplementedException("error");
-        }
-
         public void currentTime(long time)
         {
             DiscardImplementation(time);
@@ -70,11 +64,6 @@ namespace MDA.Implementation
         {
             DiscardImplementation(tickerId);
             throw new NotImplementedException("tickSnapshotEnd");
-        }
-
-        public void connectionClosed()
-        {
-            throw new NotImplementedException("connectionClosed");
         }
 
         public void accountSummary(int reqId, string account, string tag, string value, string currency)

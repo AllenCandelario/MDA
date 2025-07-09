@@ -1,9 +1,11 @@
 ﻿using IBApi;
+using MDA.Enum;
+using MDA.Model;
 using Microsoft.Extensions.Configuration;
 
 namespace MDA.Implementation
 {
-    // Base EWrapper implementation for connection. Other method implementations will be split into other classes, so we're declaring this class with the partial keyword
+    // Base EWrapper implementation for connection. Other method implementations will be split into an extension of this class, so we're declaring this class with the partial keyword
     public partial class IBClient : EWrapper
     {
         internal readonly EClientSocket _clientSocket;
@@ -51,31 +53,39 @@ namespace MDA.Implementation
                 } 
             }) 
             { IsBackground = true }.Start();
+
+            // Consider using the Task way but test out the perfomance first
+            //_ = Task.Run(async () =>
+            //{
+            //    while (_clientSocket.IsConnected())
+            //    {
+            //        _signal.waitForSignal();   // still blocks; can wrap in TaskCompletionSource
+            //        reader.processMsgs();
+            //        await Task.Yield();        // cooperative
+            //    }
+            //});
         }
 
-        public void error(Exception e)
+        void EWrapper.connectAck()
         {
-            Console.WriteLine($"Exception: {e.Message}");
+            Console.WriteLine("Connection Acknowledged");
         }
 
-        public void managedAccounts(string accountsList)
+        void EWrapper.connectionClosed()
+        {
+            Console.WriteLine("Connection Closed");
+        }
+
+        // To move to another class 
+        void EWrapper.managedAccounts(string accountsList)
         {
             Console.WriteLine($"accountsList: {accountsList}");
         }
 
-        public void nextValidId(int orderId)
+        // To move to another partial class
+        void EWrapper.nextValidId(int orderId)
         {
             Console.WriteLine($"orderId: {orderId}");
-        }
-
-        public void error(int id, int errorCode, string errorMsg, string advancedOrderRejectJson)
-        {
-            Console.WriteLine($"IBKR error - id: {id}, errorCode: {errorCode}, errorMsg: {errorMsg}, advancedOrderRejectJson: {advancedOrderRejectJson}");
-        }
-
-        public void connectAck()
-        {
-            Console.WriteLine("Connection Acknowledged");
         }
     }
 }
