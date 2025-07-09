@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 using IBApi;
 using MDA.Enum;
 using MDA.Model;
-using Newtonsoft.Json;
 
+// TODO: Consider changing the IBNotificationModel to struct and other improvements when the incoming messages start becoming more
 namespace MDA.Implementation
 {
     public partial class IBClient : EWrapper
     {
-        public event EventHandler<IBNotificationModel> NotificationReceived;
+        public event EventHandler<IBNotificationModel>? NotificationReceived;
 
         void EWrapper.error(Exception e)
         {

@@ -2,7 +2,6 @@
 using MDA.Enum;
 using MDA.Model;
 using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
 
 namespace MDA.Implementation
 {

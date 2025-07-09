@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using MDA.Implementation;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace MDA.App
 {
@@ -16,7 +16,7 @@ namespace MDA.App
                 .Build();
 
             var ibClient = new IBClient(config);
-            ibClient.NotificationReceived += (_, ibNotification) => Console.WriteLine($"Notification: {JsonConvert.SerializeObject(ibNotification)}");
+            ibClient.NotificationReceived += (_, ibNotification) => Console.WriteLine($"Notification: {JsonSerializer.Serialize(ibNotification)}");
             ibClient.InitiateConnection();
 
             Console.ReadLine();
