@@ -5,7 +5,15 @@ using Microsoft.Extensions.Configuration;
 
 namespace MDA.Implementation
 {
-    // Base EWrapper implementation for connection. Other method implementations will be split into an extension of this class, so we're declaring this class with the partial keyword
+/*
+    DECISIONS:
+    - God class IBClient (with the partial keyword) since EWrapper contains all the methods. This main class handles connection-related methods 
+    - Calls one dedicated background thread (new Thread keyword) to handle message processing
+
+    FUTURE IMPROVEMENTS:
+    - Using a dedicated thread or core via the ProcessThread.ProcessorAffinity or IdealProcessor keywords
+    - Using a thread-pool task via the Task keyword 
+*/
     public partial class IBClient : EWrapper
     {
         internal readonly EClientSocket _clientSocket;
@@ -53,17 +61,6 @@ namespace MDA.Implementation
                 } 
             }) 
             { IsBackground = true }.Start();
-
-            // Consider using the Task way but test out the perfomance first
-            //_ = Task.Run(async () =>
-            //{
-            //    while (_clientSocket.IsConnected())
-            //    {
-            //        _signal.waitForSignal();   // still blocks; can wrap in TaskCompletionSource
-            //        reader.processMsgs();
-            //        await Task.Yield();        // cooperative
-            //    }
-            //});
         }
 
         void EWrapper.connectAck()
@@ -74,12 +71,6 @@ namespace MDA.Implementation
         void EWrapper.connectionClosed()
         {
             Console.WriteLine("Connection Closed");
-        }
-
-        // To move to another class 
-        void EWrapper.managedAccounts(string accountsList)
-        {
-            Console.WriteLine($"accountsList: {accountsList}");
         }
 
         // To move to another partial class
