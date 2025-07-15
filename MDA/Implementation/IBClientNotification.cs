@@ -7,47 +7,38 @@ using IBApi;
 using MDA.Enum;
 using MDA.Model;
 
-// TODO: Consider changing the IBNotificationModel to struct and other improvements when the incoming messages start becoming more
+/*
+    DECISIONS:
+    - Use structs > class more much higher speeds
+    - Use readonly stuct > record struct to maintain flexibility for own method implementations like .Equals or .ToString if needed
+    - Using an event handler to manage messages/notifications
+
+    FUTURE IMPROVEMENTS:
+    - Use channels instead of delegates if back-pressure starts becoming a problem
+    - Use an interface i.e. INotificationSink if you find yourself changing the handling of messages/notifications
+    - A code path that the JIT’s tier‑1 compiler has fully optimised and inlined after a warm‑up. Run a quick synthetic load at startup so your handlers are “hot”.
+*/
 namespace MDA.Implementation
 {
     public partial class IBClient : EWrapper
     {
-        public event EventHandler<IBNotificationModel>? NotificationReceived;
+        public event EventHandler<IBNotification> NotificationReceived;
 
         void EWrapper.error(Exception e)
         {
-            IBNotificationModel ibNotification = new IBNotificationModel
-            {
-                errorMsg = e.Message,
-                type = NotificationType.Error
-            };
+            IBNotification ibNotification = new IBNotification(e.Message);
             NotificationReceived?.Invoke(this, ibNotification);
         }
 
         void EWrapper.error(string str)
         {
-            IBNotificationModel ibNotification = new IBNotificationModel
-            {
-                errorMsg = str,
-                type = NotificationType.Error
-            };
+            IBNotification ibNotification = new IBNotification(str);
             NotificationReceived?.Invoke(this, ibNotification);
         }
 
-        void EWrapper.error(int id, int errorCode, string errorMsg, string advancedOrderRejectJson)
+        public void error(int id, int errorCode, string errorMsg, string advancedOrderRejectJson)
         {
-            IBNotificationModel ibNotification = new IBNotificationModel
-            {
-                id = id,
-                errorCode = errorCode,
-                errorMsg = errorMsg,
-                advancedOrderRejectJson = advancedOrderRejectJson,
-                type = errorCode switch
-                { 
-                    2104 or 2017 or 2157 => NotificationType.OK,
-                    _ => NotificationType.Error
-                }
-            };
+            IBNotification ibNotification = new IBNotification(id, errorCode, errorMsg, advancedOrderRejectJson);
             NotificationReceived?.Invoke(this, ibNotification);
         }
     }
