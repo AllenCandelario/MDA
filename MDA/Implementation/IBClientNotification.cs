@@ -36,6 +36,7 @@ namespace MDA.Implementation
             NotificationReceived?.Invoke(this, ibNotification);
         }
 
+        // EWrapper method but we're benchmarking this so we cannot use the explicit method interface implementation (without casting it)
         public void error(int id, int errorCode, string errorMsg, string advancedOrderRejectJson)
         {
             IBNotification ibNotification = new IBNotification(id, errorCode, errorMsg, advancedOrderRejectJson);
