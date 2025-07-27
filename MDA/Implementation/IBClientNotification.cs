@@ -9,9 +9,7 @@ using MDA.Model;
 
 /*
     DECISIONS:
-    - Use structs > class more much higher speeds
-    - Use readonly stuct > record struct to maintain flexibility for own method implementations like .Equals or .ToString if needed
-    - Using an event handler to manage messages/notifications
+    - Using an Action event signature instead of EventHandler to manage messages/notifications --> Currently have no need for EventArgs with sender info
 
     FUTURE IMPROVEMENTS:
     - Use channels instead of delegates if back-pressure starts becoming a problem
@@ -22,25 +20,25 @@ namespace MDA.Implementation
 {
     public partial class IBClient : EWrapper
     {
-        public event EventHandler<IBNotification> NotificationReceived;
+        public event Action<IBNotification>? NotificationReceived;
 
         void EWrapper.error(Exception e)
         {
             IBNotification ibNotification = new IBNotification(e.Message);
-            NotificationReceived?.Invoke(this, ibNotification);
+            NotificationReceived?.Invoke(ibNotification);
         }
 
         void EWrapper.error(string str)
         {
             IBNotification ibNotification = new IBNotification(str);
-            NotificationReceived?.Invoke(this, ibNotification);
+            NotificationReceived?.Invoke(ibNotification);
         }
 
         // EWrapper method but we're benchmarking this so we cannot use the explicit method interface implementation (without casting it)
         public void error(int id, int errorCode, string errorMsg, string advancedOrderRejectJson)
         {
             IBNotification ibNotification = new IBNotification(id, errorCode, errorMsg, advancedOrderRejectJson);
-            NotificationReceived?.Invoke(this, ibNotification);
+            NotificationReceived?.Invoke(ibNotification);
         }
     }
 }

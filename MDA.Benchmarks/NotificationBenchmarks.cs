@@ -29,7 +29,7 @@ namespace MDA.Benchmarks
             _notificationModel_1000 = Enumerable.Range(0, 1_000)
                                .Select(i => (id: -1, errorCode: 2104, errorMsg: "Market data farm connection is OK:hfarm", advancedOrderRejectJson: ""))
                                .ToList();
-            _client.NotificationReceived += (_, _) => { };
+            _client.NotificationReceived += (_) => { };
         }
 
         [Benchmark(Baseline = true)]

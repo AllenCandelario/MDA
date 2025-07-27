@@ -7,16 +7,14 @@ using System.Threading.Tasks;
 
 /*
     DECISIONS:
-    - Use structs > class more much higher speeds
-    - Use readonly stuct > record struct to maintain flexibility for own method implementations like .Equals or .ToString if needed
+    - Use of class (sealed + record) because of the strings requirement for error messages
 
     FUTURE IMPROVEMENTS:
-    - record struct if there is no need for other method implementations
 */
 
 namespace MDA.Model
 {
-    public readonly struct IBNotification
+    public sealed record class IBNotification
     {
         public IBNotification(int id, int errorCode, string errorMsg, string advancedOrderRejectJson)
         {
@@ -39,8 +37,8 @@ namespace MDA.Model
 
         public int Id { get; }
         public int ErrorCode { get; }
-        public string ErrorMsg { get; }
-        public string AdvancedOrderRejectJson { get; }
+        public string? ErrorMsg { get; }
+        public string? AdvancedOrderRejectJson { get; }
         public NotificationType Type { get; }
     }
 }
