@@ -66,47 +66,10 @@ namespace MDA.Implementation
             throw new NotImplementedException("tickSnapshotEnd");
         }
 
-        public void accountSummary(int reqId, string account, string tag, string value, string currency)
-        {
-            DiscardImplementation(reqId, account, tag, value, currency);
-            throw new NotImplementedException("accountSummary");
-        }
-
-        public void accountSummaryEnd(int reqId)
-        {
-            DiscardImplementation(reqId);
-            throw new NotImplementedException("accountSummaryEnd");
-        }
-
         public void bondContractDetails(int reqId, ContractDetails contractDetails)
         {
             DiscardImplementation(reqId, contractDetails);
             throw new NotImplementedException("bondContractDetails");
-        }
-
-        public void updateAccountValue(string key, string value, string currency, string accountName)
-        {
-            DiscardImplementation(key, value, currency, accountName);
-            throw new NotImplementedException("updateAccountValue");
-        }
-
-        public void updatePortfolio(Contract contract, decimal position, double marketPrice, double marketValue,
-            double averageCost, double unrealizedPNL, double realizedPNL, string accountName)
-        {
-            DiscardImplementation(contract, position, marketPrice, marketValue, averageCost, unrealizedPNL, realizedPNL, accountName);
-            throw new NotImplementedException("updatePortfolio");
-        }
-
-        public void updateAccountTime(string timestamp)
-        {
-            DiscardImplementation(timestamp);
-            throw new NotImplementedException("updateAccountTime");
-        }
-
-        public void accountDownloadEnd(string account)
-        {
-            DiscardImplementation(account);
-            throw new NotImplementedException("accountDownloadEnd");
         }
 
         public void orderStatus(int orderId, string status, decimal filled, decimal remaining, double avgFillPrice,
