@@ -12,11 +12,16 @@ namespace MDA.Implementation
 {
     public partial class IBClient : EWrapper
     {
-        public List<string> AccountIds { get; set; }
+        private int _nextAccountSummaryRequestId = 0;
+        private readonly HashSet<int> _activeAccountSummaryRequestIds = new();
+        
+        private List<string> AccountIds { get; set; }
+
+        public event Action<IBAccountUpdate> AccountUpdateReceived;
 
         void EWrapper.managedAccounts(string accountsList)
         {
-            AccountIds = [.. accountsList.Split(',')];
+            AccountIds = new List<string>(accountsList.Split(','));
             Console.WriteLine($"List of Account Ids: {accountsList}");
         }
 
@@ -27,22 +32,32 @@ namespace MDA.Implementation
         */
         #region Account Summary
 
-        // Action to subscribe / cancel
-        public void SubscribeToAccountSummary(bool subscribe = true, int requestId = 1, string accountGroup = "All", string commaSeparatedTags = "")
+        // Action to subscribe
+        public int SubscribeToAccountSummary(string accountGroup = "All", string commaSeparatedTags = "")
         {
-            if (subscribe)
+            int requestId = Interlocked.Increment(ref _nextAccountSummaryRequestId);
+
+            if (string.IsNullOrEmpty(commaSeparatedTags))
             {
-                if (string.IsNullOrEmpty(commaSeparatedTags))
-                {
-                    commaSeparatedTags = AccountSummaryTags.GetAllTags();
-                }
-                Console.WriteLine($"Subscribing to account summary for Account Group: {accountGroup}");
-                _clientSocket.reqAccountSummary(requestId, accountGroup, commaSeparatedTags);
+                commaSeparatedTags = AccountSummaryTags.GetAllTags();
+            }
+            Console.WriteLine($"[AccountSummary] Subscribing for Account Group: {accountGroup} with requestId: {requestId}");
+            _clientSocket.reqAccountSummary(requestId, accountGroup, commaSeparatedTags);
+            _activeAccountSummaryRequestIds.Add(requestId);
+            return requestId;
+        }
+
+        // Action to cancel
+        public void CancelAccountSummary(int requestId)
+        {
+            if (_activeAccountSummaryRequestIds.Remove(requestId))
+            {
+                Console.WriteLine($"[AccountSummary] Cancelling requestId={requestId}");
+                _clientSocket.cancelAccountSummary(requestId);
             }
             else
             {
-                Console.WriteLine($"Cancelling account summary subscription for request ID: {requestId}");
-                _clientSocket.cancelAccountSummary(requestId);
+                Console.WriteLine($"[AccountSummary] Attempted to cancel unknown or already cancelled requestId={requestId}");
             }
         }
 
@@ -82,23 +97,27 @@ namespace MDA.Implementation
 
         void EWrapper.updateAccountValue(string key, string value, string currency, string accountName)
         {
-            Console.WriteLine($"updateAccountValue: key = {key}, value = {value}, currency = {currency}, accountName = {accountName}");
+            var dto = new IBUpdateAccountValue(key, value, currency, accountName);
+            AccountUpdateReceived?.Invoke(dto);
         }
 
         public void updatePortfolio(Contract contract, decimal position, double marketPrice, double marketValue,
             double averageCost, double unrealizedPNL, double realizedPNL, string accountName)
         {
-            Console.WriteLine($"updatePortfolio: contract = {JsonSerializer.Serialize(contract)}, position= {position}, marketPrice= {marketPrice}, marketValue= {marketValue}, averageCost= {averageCost}, unrealisedPNL = {unrealizedPNL}, realizedPNL = {realizedPNL}, accountName = {accountName}");
+            var dto = new IBUpdatePortfolio(contract, position, marketPrice, marketValue, averageCost, unrealizedPNL, realizedPNL, accountName);
+            AccountUpdateReceived?.Invoke(dto);
         }
 
         void EWrapper.updateAccountTime(string timestamp)
         {
-            Console.WriteLine($"updateAccountTime: {timestamp}");
+            var dto = new IBUpdateAccountTime(timestamp);
+            AccountUpdateReceived?.Invoke(dto);
         }
 
         void EWrapper.accountDownloadEnd(string account)
         {
-            Console.WriteLine($"accountDownloadEnd: {account}");
+            var dto = new IBAccountDownloadEnd(account);
+            AccountUpdateReceived?.Invoke(dto);
         }
 
         #endregion
