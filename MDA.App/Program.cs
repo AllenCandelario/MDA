@@ -16,10 +16,34 @@ namespace MDA.App
                 .Build();
 
             var ibClient = new IBClient(config);
-            ibClient.NotificationReceived += (_, ibNotification) => Console.WriteLine($"Notification: {JsonSerializer.Serialize(ibNotification)}");
+            
+            ibClient.NotificationReceived += (ibNotification) => Console.WriteLine($"Notification: {JsonSerializer.Serialize(ibNotification)}");
             ibClient.InitiateConnection();
 
-            Console.ReadLine();
+            while (true)
+            {
+                var cmd = Console.ReadLine()?.Trim().ToLowerInvariant();
+                switch (cmd)
+                {
+                    case "exit":
+                        return;
+                    case "cancel account summary":
+                        ibClient.SubscribeToAccountSummary(false);
+                        break;
+                    case "subscribe account summary":
+                        ibClient.SubscribeToAccountSummary(true);
+                        break;
+                    case "subscribe account updates":
+                        ibClient.SubscribeToAccountUpdates(true);
+                        break;
+                    case "cancel account updates":
+                        ibClient.SubscribeToAccountUpdates(false);
+                        break;
+                    default:
+                        Console.WriteLine("Invalid command");
+                        break;
+                }
+            }
         }
     }
 }
