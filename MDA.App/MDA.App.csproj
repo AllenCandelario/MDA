@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\IBKR.API\IBKR.API.csproj" />
     <ProjectReference Include="..\MDA\MDA.csproj" />
   </ItemGroup>
 

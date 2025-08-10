@@ -16,6 +16,7 @@ namespace MDA.Implementation
         private readonly HashSet<int> _activeAccountSummaryRequestIds = new();
         
         private List<string> AccountIds { get; set; }
+        public bool _accountUpdateSubscriptionReady = false;
 
         public event Action<IBAccountUpdate> AccountUpdateReceived;
 
@@ -23,6 +24,7 @@ namespace MDA.Implementation
         {
             AccountIds = new List<string>(accountsList.Split(','));
             Console.WriteLine($"List of Account Ids: {accountsList}");
+            CheckAccountUpdateSubscriptionReady();
         }
 
         /*
@@ -118,6 +120,13 @@ namespace MDA.Implementation
         {
             var dto = new IBAccountDownloadEnd(account);
             AccountUpdateReceived?.Invoke(dto);
+        }
+        void CheckAccountUpdateSubscriptionReady()
+        {
+            if (!_accountUpdateSubscriptionReady && AccountIds?.Any() == true)
+            {
+                _accountUpdateSubscriptionReady = true;
+            }
         }
 
         #endregion
