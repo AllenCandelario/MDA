@@ -9,7 +9,7 @@ using MDA.Model;
 using System.Security.Principal;
 
 
-namespace MDA.App.Workers
+namespace MDA.App.Workers.Subscribers
 {
     public sealed class IBAccountWorker : BackgroundService
     {
@@ -20,16 +20,14 @@ namespace MDA.App.Workers
             _ib = ib;
         }
 
-        protected override Task ExecuteAsync(CancellationToken ct)
+        protected override async Task ExecuteAsync(CancellationToken ct)
         {
             int retries = 0, maxRetries = 5;
 
-            while (!_ib._accountUpdateSubscriptionReady
-                   && !ct.IsCancellationRequested
-                   && retries < maxRetries)
+            while (!_ib._accountUpdateSubscriptionReady && !ct.IsCancellationRequested && retries < maxRetries)
             {
                 Console.WriteLine("[Acct] Waiting for IB readiness...");
-                Thread.Sleep(500);
+                await Task.Delay(500);
                 retries++;
             }
 
@@ -42,8 +40,6 @@ namespace MDA.App.Workers
             {
                 Console.WriteLine("[WARN] IB not ready after retries. Skipping subscription.");
             }
-
-            return Task.CompletedTask;
         }
 
         public override Task StopAsync(CancellationToken ct)
