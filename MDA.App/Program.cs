@@ -4,8 +4,11 @@ using System.Text.Json;
 using MDA.Model;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using MDA.App.Workers;
 using MDA.App.Service;
+using MDA.App.Service.Notification;
+using MDA.App.Workers.Subscribers;
+using MDA.App.Workers.Listeners;
+using MDA.App.Service.AccountUpdate;
 
 namespace MDA.App
 {
@@ -18,14 +21,28 @@ namespace MDA.App
                 {
                     services
                         .AddSingleton<IBClient>() // Main IBKR class 
-                        .AddSingleton<IBNotificationService>() // Handles notification events
-                        .AddSingleton<IBAccountService>() // Handles account events
 
-                        .AddHostedService<IBConnectionWorker>() // Connects
+                    #region Listeners, throws events to Handlers
                         .AddHostedService<IBNotificationListener>() // Listener for notification events --> Passes to IBNotificationService
-                        .AddHostedService<IBAccountWorker>() // Subscribes to account events
-                        .AddHostedService<IBAccountListener>(); // Listener for account events --> Passes to IBAccountService
+                        .AddHostedService<IBAccountListener>() // Listener for account events --> Passes to IBAccountService
+                    #endregion
 
+                    #region Handlers
+                        // IB Notifications
+                        .AddSingleton<INotificationHandler, IBNotificationTestLongService>()
+                        .AddSingleton<INotificationHandler, IBNotificationKafkaService>()
+                        .AddSingleton<INotificationHandler, IBNotificationGenericService>()
+
+                        // IB Account Updates
+                        .AddSingleton<IAccountUpdateHandler, IBAccountUpdateGenericService>()
+                        .AddSingleton<IAccountUpdateHandler, IBAccountUpdateKafkaService>()
+                    #endregion
+
+                    #region Subscribers (auto-subscribes as background jobs)
+                        .AddHostedService<IBConnectionWorker>() // Connects
+                        .AddHostedService<IBAccountWorker>() // Subscribes to account events
+                        ;
+                    #endregion
                 })
                 .Build();
 

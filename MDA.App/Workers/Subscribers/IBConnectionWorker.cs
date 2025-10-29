@@ -1,14 +1,14 @@
 ﻿using MDA.Implementation;
 using MDA.Model;
 using Microsoft.Extensions.Hosting;
-using System;   
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace MDA.App.Workers
+namespace MDA.App.Workers.Subscribers
 {
     // Handles connections only 
     public sealed class IBConnectionWorker : BackgroundService

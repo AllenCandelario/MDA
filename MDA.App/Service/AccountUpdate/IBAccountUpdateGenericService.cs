@@ -5,13 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MDA.App.Service
+namespace MDA.App.Service.AccountUpdate
 {
-    public sealed class IBAccountService
+    public sealed class IBAccountUpdateGenericService : IAccountUpdateHandler
     {
-        public IBAccountService() { }
+        public IBAccountUpdateGenericService() { }
 
-        public void HandleAccountUpdate(IBAccountUpdate accountUpdate)
+        public async Task HandleAsync(IBAccountUpdate accountUpdate, CancellationToken cancellationToken)
         {
             switch (accountUpdate)
             {
