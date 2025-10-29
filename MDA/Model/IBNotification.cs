@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace MDA.Model
 {
-    public sealed record class IBNotification
+    public sealed record IBNotification
     {
         public IBNotification(int id, int errorCode, string errorMsg, string advancedOrderRejectJson)
         {

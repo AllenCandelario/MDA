@@ -74,7 +74,7 @@ namespace MDA.Implementation
         */
         void EWrapper.accountSummaryEnd(int reqId)
         {
-            Console.WriteLine($"$accountSummaryEnd: {reqId}");
+            Console.WriteLine($"accountSummaryEnd: {reqId}");
         }
         #endregion
 
