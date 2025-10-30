@@ -1,12 +1,5 @@
 ﻿using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using MDA.Implementation;
-using MDA.Model;
-using System.Security.Principal;
 
 
 namespace MDA.App.Workers.Subscribers

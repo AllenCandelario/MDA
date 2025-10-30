@@ -1,15 +1,7 @@
-﻿using MDA.App.Service;
-using MDA.App.Service.AccountUpdate;
-using MDA.App.Service.Notification;
+﻿using MDA.App.Service.AccountUpdate;
 using MDA.Implementation;
 using MDA.Model;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace MDA.App.Workers.Listeners
 {

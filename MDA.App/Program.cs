@@ -1,10 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
-using MDA.Implementation;
-using System.Text.Json;
-using MDA.Model;
+﻿using MDA.Implementation;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using MDA.App.Service;
 using MDA.App.Service.Notification;
 using MDA.App.Workers.Subscribers;
 using MDA.App.Workers.Listeners;
