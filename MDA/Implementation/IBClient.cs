@@ -1,7 +1,9 @@
 ﻿using IBApi;
+using MDA.Config;
 using MDA.Enum;
 using MDA.Model;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace MDA.Implementation
 {
@@ -20,33 +22,18 @@ namespace MDA.Implementation
         internal readonly EReaderSignal _signal;
         internal Thread _readerThread;
         
-        internal readonly string _host;
-        internal readonly int _port;
-        internal readonly int _clientId;
+        private readonly IBKRConfigOptions _ibkrConfig;
 
-        public IBClient(IConfiguration configuration)
+        public IBClient(IOptions<IBKRConfigOptions> options)
         {
+            _ibkrConfig = options.Value;
             _signal = new EReaderMonitorSignal();
             _clientSocket = new EClientSocket(this, _signal);
-
-            #region Default to standard localhost connection if environment variables are not available
-            _host = configuration.GetSection("IBKRConfig:Host").Value ?? "127.0.0.1";
-            
-            if (!int.TryParse(configuration.GetSection("IBKRConfig:Port").Value, out _port))
-            {
-                _port = 4001;
-            }
-
-            if (!int.TryParse(configuration.GetSection("IBKRConfig:ClientId").Value, out _clientId))
-            {
-                _clientId = 0;
-            }
-            #endregion
         }
 
         public void InitiateConnection()
         {
-            _clientSocket.eConnect(_host, _port, _clientId);
+            _clientSocket.eConnect(_ibkrConfig.Host, _ibkrConfig.Port, _ibkrConfig.ClientId);
 
             // Create a reader to consume messages from the TWS. The EReader will consume the incoming messages and put them in a queue
             var reader = new EReader(_clientSocket, _signal);

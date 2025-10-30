@@ -5,6 +5,9 @@ using MDA.App.Service.Notification;
 using MDA.App.Workers.Subscribers;
 using MDA.App.Workers.Listeners;
 using MDA.App.Service.AccountUpdate;
+using MDA.Config;
+using MDA.App.Infrastructure.Kafka;
+using Microsoft.Extensions.Configuration;
 
 namespace MDA.App
 {
@@ -13,8 +16,19 @@ namespace MDA.App
         static async Task Main(string[] args)
         {
             using IHost host = Host.CreateDefaultBuilder(args)
-                .ConfigureServices(services =>
+                .ConfigureServices((context, services) =>
                 {
+                    #region Configuration
+                    services
+                        .Configure<IBKRConfigOptions>(context.Configuration.GetSection("IBKRConfig"))
+                        .Configure<KafkaConfigOptions>(context.Configuration.GetSection("KafkaConfig"));
+                    #endregion
+
+                    #region Kafka
+                    services.AddSingleton<KafkaProducer>();
+                    #endregion
+
+                    #region IBKR connection + subscribers + listeners & handlers
                     services
                         .AddSingleton<IBClient>() // Main IBKR class 
 
@@ -38,6 +52,7 @@ namespace MDA.App
                         .AddHostedService<IBConnectionWorker>() // Connects
                         .AddHostedService<IBAccountWorker>() // Subscribes to account events
                         ;
+                    #endregion
                     #endregion
                 })
                 .Build();

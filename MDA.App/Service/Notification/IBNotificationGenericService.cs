@@ -1,4 +1,5 @@
 ﻿using MDA.Model;
+using System.Text.Json;
 
 namespace MDA.App.Service.Notification
 {
@@ -8,7 +9,8 @@ namespace MDA.App.Service.Notification
 
         public async Task HandleAsync(IBNotification notification, CancellationToken ct)
         {
-            throw new Exception("test error");
+            Console.WriteLine($"[Generic Received]: {JsonSerializer.Serialize(notification)}");
+            throw new Exception("[Generic Processed]: Throwing test exception");
         }
     }
 }
