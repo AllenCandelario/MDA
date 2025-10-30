@@ -1,44 +1,58 @@
-﻿using MDA.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Confluent.Kafka;
+using MDA.App.Infrastructure.Kafka;
+using MDA.Model;
+using Microsoft.Extensions.Options;
+using System.Text.Json;
 
 namespace MDA.App.Service.AccountUpdate
 {
     public sealed class IBAccountUpdateKafkaService : IAccountUpdateHandler
     {
-        public IBAccountUpdateKafkaService() { }
+        private readonly KafkaProducer _kafka;
+        private readonly string _topic;
 
-        public async Task HandleAsync(IBAccountUpdate accountUpdate, CancellationToken cancellationToken)
+        public IBAccountUpdateKafkaService(KafkaProducer kafka, IOptions<KafkaConfigOptions> opts)
         {
-            switch (accountUpdate)
+            _kafka = kafka;
+            _topic = opts.Value.AccountUpdateTopic;
+        }
+
+        public Task HandleAsync(IBAccountUpdate update, CancellationToken ct)
+        {
+            string key;
+            string value = JsonSerializer.Serialize(update);
+
+            switch (update)
             {
                 case IBUpdateAccountValue v:
-                    Console.WriteLine(
-                        $"[Value] {v.AccountName}: {v.Key} = {v.Value} {v.Currency}"
-                    );
+                    key = $"{v.AccountName}:{v.Key}";
                     break;
-
                 case IBUpdatePortfolio p:
-                    Console.WriteLine(
-                        $"[Position] {p.AccountName}: {p.Contract.Symbol} {p.Position} @ {p.MarketPrice} → P&L {p.UnrealizedPNL}/{p.RealizedPNL}"
-                    );
+                    key = $"{p.AccountName}:{p.Contract?.Symbol}";
                     break;
-
                 case IBUpdateAccountTime t:
-                    Console.WriteLine($"[Time] {t.Timestamp}");
+                    key = t.Timestamp;
                     break;
-
                 case IBAccountDownloadEnd e:
-                    Console.WriteLine($"[End] Download complete for account {e.Account}");
+                    key = e.Account;
                     break;
-
                 default:
-                    Console.WriteLine("[Unknown account update]");
+                    key = "unknown";
                     break;
             }
+
+            var kafkaMessage = new Message<string, string> { Key = key, Value = JsonSerializer.Serialize(update) };
+            Console.WriteLine($"[Kafka Received]: {JsonSerializer.Serialize(update)}");
+            try
+            {
+                _kafka.Producer.Produce(_topic, kafkaMessage);
+            }
+            catch (ProduceException<string, string> ex)
+            {
+                Console.Error.WriteLine($"[Kafka] drop: {ex.Error.Reason}");
+            }
+            Console.WriteLine($"[Kafka Processed]");
+            return Task.CompletedTask;
         }
     }
 }
