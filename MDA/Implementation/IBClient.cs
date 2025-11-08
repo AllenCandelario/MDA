@@ -1,9 +1,8 @@
 ﻿using IBApi;
 using MDA.Config;
-using MDA.Enum;
-using MDA.Model;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace MDA.Implementation
 {
@@ -24,11 +23,14 @@ namespace MDA.Implementation
         
         private readonly IBKRConfigOptions _ibkrConfig;
 
-        public IBClient(IOptions<IBKRConfigOptions> options)
+        private readonly ILogger<IBClient> _logger;
+
+        public IBClient(IOptions<IBKRConfigOptions> options, ILogger<IBClient> logger)
         {
             _ibkrConfig = options.Value;
             _signal = new EReaderMonitorSignal();
             _clientSocket = new EClientSocket(this, _signal);
+            _logger = logger ?? NullLogger<IBClient>.Instance; // no-op logger if no concrete implementation is provided
         }
 
         public void InitiateConnection()
@@ -55,23 +57,25 @@ namespace MDA.Implementation
         public void Dispose()
         {
             _clientSocket.eDisconnect(); // closes TCP socket
-            _readerThread.Join(); // Blocks calling thread until the while(_clientSocket.Isconnect()) exits
+            if (_readerThread is { IsAlive: true })
+            {
+                _ = _readerThread.Join(TimeSpan.FromSeconds(2)); // Blocks calling thread until the while(_clientSocket.Isconnect()) exits
+            }
         }
 
         void EWrapper.connectAck()
         {
-            Console.WriteLine("Connection Acknowledged");
+            IBLogging.ConnectionAck(_logger);
         }
 
         void EWrapper.connectionClosed()
         {
-            Console.WriteLine("Connection Closed");
+            IBLogging.ConnectionClosed(_logger);
         }
 
-        // To move to another partial class
         void EWrapper.nextValidId(int orderId)
         {
-            Console.WriteLine($"orderId: {orderId}");
+            IBLogging.NextValidId(_logger, orderId);
         }
     }
 }
