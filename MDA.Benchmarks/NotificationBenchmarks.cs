@@ -4,6 +4,7 @@ using BenchmarkDotNet.Order;
 using MDA.Implementation;
 using MDA.Config;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace MDA.Benchmarks
 {
@@ -18,14 +19,10 @@ namespace MDA.Benchmarks
         [GlobalSetup]
         public void Setup()
         {
-            var opts = Options.Create(new IBKRConfigOptions
-            {
-                Host = "127.0.0.1",
-                Port = 4001,
-                ClientId = 0
-            });
+            var opts = Options.Create(new IBKRConfigOptions { Host = "127.0.0.1", Port = 4001, ClientId = 0 });
+            var logger = NullLogger<IBClient>.Instance; // no op logger
 
-            _client = new IBClient(opts);
+            _client = new IBClient(opts, logger);
             _client.NotificationReceived += _ => { /* no-op */ };
 
             _msgs = Enumerable.Range(0, 1_000)
