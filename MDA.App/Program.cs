@@ -41,10 +41,10 @@ namespace MDA.App
                         // IB Notifications
                         .AddSingleton<INotificationHandler, IBNotificationTestLongService>()
                         .AddSingleton<INotificationHandler, IBNotificationKafkaService>()
-                        .AddSingleton<INotificationHandler, IBNotificationGenericService>()
+                        //.AddSingleton<INotificationHandler, IBNotificationGenericService>()
 
                         // IB Account Updates
-                        .AddSingleton<IAccountUpdateHandler, IBAccountUpdateGenericService>()
+                        //.AddSingleton<IAccountUpdateHandler, IBAccountUpdateGenericService>()
                         .AddSingleton<IAccountUpdateHandler, IBAccountUpdateKafkaService>()
                     #endregion
 

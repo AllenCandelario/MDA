@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Security.Principal;
-using System.Text;
-using System.Text.Json;
-using IBApi;
+﻿using IBApi;
+using MDA.Config;
 using MDA.Model;
 
 namespace MDA.Implementation
@@ -23,16 +17,16 @@ namespace MDA.Implementation
         void EWrapper.managedAccounts(string accountsList)
         {
             AccountIds = new List<string>(accountsList.Split(','));
-            Console.WriteLine($"List of Account Ids: {accountsList}");
+            IBLogging.ManagedAccounts(_logger, accountsList);
             CheckAccountUpdateSubscriptionReady();
         }
 
+        #region Account Summary
         /*
          * EClient.reqAccountSummary --> EWrapper.accountSummary --> EWrapper.accountSummaryEnd
          * EClient.cancelAccountSummary to unsubscribe
          * Refreshes every 3 minutes for values that have changed
         */
-        #region Account Summary
 
         // Action to subscribe
         public int SubscribeToAccountSummary(string accountGroup = "All", string commaSeparatedTags = "")
@@ -43,7 +37,7 @@ namespace MDA.Implementation
             {
                 commaSeparatedTags = AccountSummaryTags.GetAllTags();
             }
-            Console.WriteLine($"[AccountSummary] Subscribing for Account Group: {accountGroup} with requestId: {requestId}");
+            IBLogging.AccountSummarySub(_logger, accountGroup, requestId);
             _clientSocket.reqAccountSummary(requestId, accountGroup, commaSeparatedTags);
             _activeAccountSummaryRequestIds.Add(requestId);
             return requestId;
@@ -54,18 +48,18 @@ namespace MDA.Implementation
         {
             if (_activeAccountSummaryRequestIds.Remove(requestId))
             {
-                Console.WriteLine($"[AccountSummary] Cancelling requestId={requestId}");
+                IBLogging.AccountSummaryCancel(_logger, requestId);
                 _clientSocket.cancelAccountSummary(requestId);
             }
             else
             {
-                Console.WriteLine($"[AccountSummary] Attempted to cancel unknown or already cancelled requestId={requestId}");
+                IBLogging.AccountSummaryCancelError(_logger, requestId);
             }
         }
 
         void EWrapper.accountSummary(int reqId, string account, string tag, string value, string currency)
         {
-            Console.WriteLine($"accountSummary: reqId = {reqId}, account = {account}, tag = {tag}, value = {value}, currency = {currency}");
+            // Do nothing for now
         }
 
         /*o
@@ -74,7 +68,7 @@ namespace MDA.Implementation
         */
         void EWrapper.accountSummaryEnd(int reqId)
         {
-            Console.WriteLine($"accountSummaryEnd: {reqId}");
+            // Do nothing for now
         }
         #endregion
 
@@ -89,11 +83,17 @@ namespace MDA.Implementation
         {
             if (string.IsNullOrEmpty(accountId))
             {
-                Console.WriteLine("AccountId is empty, pull from list of AccountIds");
+                IBLogging.AccountUpdateSubEmptyId(_logger);
                 accountId = AccountIds.FirstOrDefault();
             }
-            string action = subscribe ? "Subscribing to" : "Cancelling subscription for";
-            Console.WriteLine($"{action} account updates for account id: {accountId}");
+            if (subscribe)
+            {
+                IBLogging.AccountUpdateSub(_logger, accountId);
+            }
+            else
+            {
+                IBLogging.AccountUpdateCancel(_logger, accountId);
+            }
             _clientSocket.reqAccountUpdates(subscribe, accountId);
         }
 

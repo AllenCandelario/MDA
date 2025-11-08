@@ -1,10 +1,4 @@
-﻿using MDA.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using IBApi;
+﻿using IBApi;
 
 namespace MDA.Model
 {

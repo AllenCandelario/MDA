@@ -1,10 +1,7 @@
 ﻿using Confluent.Kafka;
+using MDA.App.Log;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MDA.App.Infrastructure.Kafka
 {
@@ -12,7 +9,7 @@ namespace MDA.App.Infrastructure.Kafka
     {
         public IProducer<string, string> Producer { get; }
 
-        public KafkaProducer(IOptions<KafkaConfigOptions> options)
+        public KafkaProducer(IOptions<KafkaConfigOptions> options, ILogger<KafkaProducer> logger)
         {
             var o = options.Value;
             var kafkaConfig = new ProducerConfig()
@@ -22,8 +19,35 @@ namespace MDA.App.Infrastructure.Kafka
                 Acks = Acks.All,
                 EnableIdempotence = o.EnableIdempotence,
                 MessageTimeoutMs = o.MessageTimeoutMs,
+                LogConnectionClose = false,
+                ReconnectBackoffMs = 500,
+                ReconnectBackoffMaxMs = 10_000,
+                StatisticsIntervalMs = 0
+
             };
-            Producer = new ProducerBuilder<string, string>(kafkaConfig).Build();
+
+            var builder = new ProducerBuilder<string, string>(kafkaConfig)
+                .SetErrorHandler((_, e) =>
+                {
+                    var code = e.Code;
+                    var isSevere =
+                    e.IsFatal ||
+                    code == ErrorCode.Local_AllBrokersDown ||
+                    code == ErrorCode.Local_Transport ||
+                    code == ErrorCode.Local_Authentication ||
+                    code == ErrorCode.Local_Resolve ||
+                    code == ErrorCode.Local_MsgTimedOut; // signals systemic delivery failure
+                    if (isSevere)
+                        MDALog.KafkaLibError(logger, e.Reason, (int)code, true);
+                    else
+                        MDALog.KafkaLibWarn(logger, e.Reason, (int)code, false);
+                })
+                .SetLogHandler((_, m) =>
+                {
+                    MDALog.KafkaLibLog(logger, m.Facility, m.Message);
+                });
+
+            Producer = builder.Build();
         }
 
         public void Dispose() => Producer.Dispose();

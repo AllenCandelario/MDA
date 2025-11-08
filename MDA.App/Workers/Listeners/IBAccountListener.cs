@@ -1,7 +1,9 @@
-﻿using MDA.App.Service.AccountUpdate;
+﻿using MDA.App.Log;
+using MDA.App.Service.AccountUpdate;
 using MDA.Implementation;
 using MDA.Model;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace MDA.App.Workers.Listeners
 {
@@ -11,22 +13,27 @@ namespace MDA.App.Workers.Listeners
         private readonly IEnumerable<IAccountUpdateHandler> _handlers;
         private CancellationToken _ct;
 
-        public IBAccountListener(IBClient ib, IEnumerable<IAccountUpdateHandler> handlers)
+        private readonly ILogger<IBAccountListener> _logger;
+
+        public IBAccountListener(IBClient ib, IEnumerable<IAccountUpdateHandler> handlers, ILogger<IBAccountListener> logger)
         {
             _ib = ib;
             _handlers = handlers;
+            _logger = logger;
         }
 
         protected override Task ExecuteAsync(CancellationToken cancellationToken)
         {
             _ct = cancellationToken;
             _ib.AccountUpdateReceived += OnAccountUpdate;
+            MDALog.AccountUpdateListenerAttached(_logger);
             return Task.CompletedTask;
         }
 
         public override Task StopAsync(CancellationToken cancellationToken)
         {
             _ib.AccountUpdateReceived -= OnAccountUpdate;
+            MDALog.AccountUpdateListenerDetached(_logger);
             return base.StopAsync(cancellationToken);
         }
 
@@ -38,7 +45,7 @@ namespace MDA.App.Workers.Listeners
             }
         }
 
-        private static async Task RunHandler(IAccountUpdateHandler handler, IBAccountUpdate accountUpdate, CancellationToken ct)
+        private async Task RunHandler(IAccountUpdateHandler handler, IBAccountUpdate accountUpdate, CancellationToken ct)
         {
             try
             {
@@ -47,7 +54,7 @@ namespace MDA.App.Workers.Listeners
             catch (OperationCanceledException) when (ct.IsCancellationRequested) { }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"[{handler.GetType().Name}] {ex}");
+                MDALog.HandlerUnhandledException(_logger, ex, handler.GetType().Name);
             }
         }
 

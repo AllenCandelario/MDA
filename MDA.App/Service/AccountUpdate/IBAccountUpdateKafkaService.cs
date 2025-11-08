@@ -1,6 +1,8 @@
 ﻿using Confluent.Kafka;
 using MDA.App.Infrastructure.Kafka;
+using MDA.App.Log;
 using MDA.Model;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 
@@ -10,11 +12,13 @@ namespace MDA.App.Service.AccountUpdate
     {
         private readonly KafkaProducer _kafka;
         private readonly string _topic;
+        private readonly ILogger<IBAccountUpdateKafkaService> _logger;
 
-        public IBAccountUpdateKafkaService(KafkaProducer kafka, IOptions<KafkaConfigOptions> opts)
+        public IBAccountUpdateKafkaService(KafkaProducer kafka, IOptions<KafkaConfigOptions> opts, ILogger<IBAccountUpdateKafkaService> logger)
         {
             _kafka = kafka;
             _topic = opts.Value.AccountUpdateTopic;
+            _logger = logger;
         }
 
         public Task HandleAsync(IBAccountUpdate update, CancellationToken ct)
@@ -41,18 +45,24 @@ namespace MDA.App.Service.AccountUpdate
                     break;
             }
 
-            var kafkaMessage = new Message<string, string> { Key = key, Value = JsonSerializer.Serialize(update) };
-            Console.WriteLine($"[Kafka Received]: {JsonSerializer.Serialize(update)}");
+            var payload = JsonSerializer.Serialize(update);
+            var kafkaMessage = new Message<string, string> { Key = key, Value = payload };
             try
             {
-                _kafka.Producer.Produce(_topic, kafkaMessage);
+                _kafka.Producer.Produce(_topic, kafkaMessage, report =>
+                {
+                    if (report.Error.IsError)
+                        MDALog.KafkaDrop(_logger, new Exception(report.Error.Reason), report.Error.Reason);
+                    else if (_logger.IsEnabled(LogLevel.Debug))
+                        MDALog.KafkaProduceInfo(_logger, report.Topic, key, payload.Length);
+                });
             }
             catch (ProduceException<string, string> ex)
             {
-                Console.Error.WriteLine($"[Kafka] drop: {ex.Error.Reason}");
+                 MDALog.KafkaDrop(_logger, ex, ex.Error.Reason);
             }
-            Console.WriteLine($"[Kafka Processed]");
             return Task.CompletedTask;
         }
     }
 }
+    

@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Hosting;
 using MDA.Implementation;
+using Microsoft.Extensions.Logging;
+using MDA.App.Log;
 
 
 namespace MDA.App.Workers.Subscribers
@@ -8,9 +10,12 @@ namespace MDA.App.Workers.Subscribers
     {
         private readonly IBClient _ib;
 
-        public IBAccountWorker(IBClient ib)
+        private readonly ILogger<IBAccountWorker> _logger;
+
+        public IBAccountWorker(IBClient ib, ILogger<IBAccountWorker> logger)
         {
             _ib = ib;
+            _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken ct)
@@ -19,7 +24,7 @@ namespace MDA.App.Workers.Subscribers
 
             while (!_ib._accountUpdateSubscriptionReady && !ct.IsCancellationRequested && retries < maxRetries)
             {
-                Console.WriteLine("[Acct] Waiting for IB readiness...");
+                MDALog.AccountUpdateWaitingForReadiness(_logger, retries);
                 await Task.Delay(500);
                 retries++;
             }
@@ -27,17 +32,18 @@ namespace MDA.App.Workers.Subscribers
             if (_ib._accountUpdateSubscriptionReady)
             {
                 _ib.SubscribeToAccountUpdates(true);
-                Console.WriteLine("[Acct] Subscribed to account updates.");
+                MDALog.AccountUpdateSubscribe(_logger);
             }
             else
             {
-                Console.WriteLine("[WARN] IB not ready after retries. Skipping subscription.");
+                MDALog.AccountUpdateNotReadyAfterRetries(_logger);
             }
         }
 
         public override Task StopAsync(CancellationToken ct)
         {
             _ib.SubscribeToAccountUpdates(false);
+            MDALog.AccountUpdateUnsubscribe(_logger);
             return base.StopAsync(ct);
         }
     }
