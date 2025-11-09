@@ -26,7 +26,7 @@ namespace MDA.App.Service.Notification
         public Task HandleAsync(IBNotification n, CancellationToken ct)
         {
             var payload = JsonSerializer.Serialize(n);
-            var kafkaMessage = new Message<string, string> { Key = "ibNotification", Value = payload };
+            var kafkaMessage = new Message<string, string> { Key = "Notification", Value = payload };
             try
             {
                 _kafka.Producer.Produce(_topic, kafkaMessage, report =>

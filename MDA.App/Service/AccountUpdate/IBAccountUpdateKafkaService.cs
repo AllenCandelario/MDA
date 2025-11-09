@@ -24,29 +24,28 @@ namespace MDA.App.Service.AccountUpdate
         public Task HandleAsync(IBAccountUpdate update, CancellationToken ct)
         {
             string key;
-            string value = JsonSerializer.Serialize(update);
+            string value = JsonSerializer.Serialize(update, update.GetType());
 
             switch (update)
             {
                 case IBUpdateAccountValue v:
-                    key = $"{v.AccountName}:{v.Key}";
+                    key = "IBUpdateAccountValue";
                     break;
                 case IBUpdatePortfolio p:
-                    key = $"{p.AccountName}:{p.Contract?.Symbol}";
+                    key = "IBUpdatePortfolio";
                     break;
                 case IBUpdateAccountTime t:
-                    key = t.Timestamp;
+                    key = "IBUpdateAccountTime";
                     break;
                 case IBAccountDownloadEnd e:
-                    key = e.Account;
+                    key = "IBAccountDownloadEnd";
                     break;
                 default:
-                    key = "unknown";
+                    key = "Unknown";
                     break;
             }
 
-            var payload = JsonSerializer.Serialize(update);
-            var kafkaMessage = new Message<string, string> { Key = key, Value = payload };
+            var kafkaMessage = new Message<string, string> { Key = key, Value = value };
             try
             {
                 _kafka.Producer.Produce(_topic, kafkaMessage, report =>
@@ -54,7 +53,7 @@ namespace MDA.App.Service.AccountUpdate
                     if (report.Error.IsError)
                         MDALog.KafkaDrop(_logger, new Exception(report.Error.Reason), report.Error.Reason);
                     else if (_logger.IsEnabled(LogLevel.Debug))
-                        MDALog.KafkaProduceInfo(_logger, report.Topic, key, payload.Length);
+                        MDALog.KafkaProduceInfo(_logger, report.Topic, key, value.Length);
                 });
             }
             catch (ProduceException<string, string> ex)
