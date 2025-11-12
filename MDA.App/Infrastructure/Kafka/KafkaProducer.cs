@@ -19,11 +19,10 @@ namespace MDA.App.Infrastructure.Kafka
                 Acks = Acks.All,
                 EnableIdempotence = o.EnableIdempotence,
                 MessageTimeoutMs = o.MessageTimeoutMs,
-                LogConnectionClose = false,
-                ReconnectBackoffMs = 500,
-                ReconnectBackoffMaxMs = 10_000,
-                StatisticsIntervalMs = 0
-
+                LogConnectionClose = o.LogConnectionClose,
+                ReconnectBackoffMs = o.ReconnectBackoffMs,
+                ReconnectBackoffMaxMs = o.ReconnectBackoffMaxMs,
+                StatisticsIntervalMs = o.StatisticsIntervalMs
             };
 
             var builder = new ProducerBuilder<string, string>(kafkaConfig)
