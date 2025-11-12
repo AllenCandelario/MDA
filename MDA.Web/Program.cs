@@ -15,7 +15,32 @@ namespace MDA.Web
             #endregion
 
             #region Configuration
+            
+            // Kafka
             builder.Services.Configure<KafkaConsumerConfigOptions>(builder.Configuration.GetSection("KafkaConsumerConfig"));
+
+            // CORS
+            var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+
+            // WS / SignalR
+            var hubPath = builder.Configuration["Realtime:HubPath"] ?? "/ws/mda";
+
+            #endregion
+
+            #region CORS
+            builder.Services.AddCors(o =>
+            {
+                o.AddPolicy("client",
+                    p => p.WithOrigins(corsOrigins)
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .AllowCredentials());
+            });
+            #endregion
+
+            #region WS / SignalR
+            builder.Services.AddSignalR();
+
             #endregion
 
             #region Background services
@@ -42,6 +67,8 @@ namespace MDA.Web
 
 
             app.MapControllers();
+
+            app.MapHub<MDAHub>(hubPath);
 
             app.Run();
         }

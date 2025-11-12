@@ -1,17 +1,25 @@
-﻿namespace MDA.Web.Messaging.Service
+﻿using Microsoft.AspNetCore.SignalR;
+
+namespace MDA.Web.Messaging.Service
 {
     public sealed class IBAccountUpdateKafkaHandler
     {
         private readonly ILogger<IBAccountUpdateKafkaHandler> _logger;
-        public IBAccountUpdateKafkaHandler(ILogger<IBAccountUpdateKafkaHandler> logger)
+        private readonly IHubContext<MDAHub> _hub;
+        public IBAccountUpdateKafkaHandler(ILogger<IBAccountUpdateKafkaHandler> logger, IHubContext<MDAHub> hub)
         {
             _logger = logger;
+            _hub = hub;
         }
 
-        public Task HandleAsync(string message, CancellationToken cancellationToken)
+        public async Task HandleAsync(string message, CancellationToken cancellationToken)
         {
             _logger.LogInformation(message);
-            return Task.CompletedTask;
+            await _hub.Clients.All.SendAsync("accountUpdate", new
+            {
+                key = "accountUpdate",
+                value = message
+            }, cancellationToken);
         }
     }
 }
