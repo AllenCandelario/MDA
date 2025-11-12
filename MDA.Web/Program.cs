@@ -1,3 +1,5 @@
+using MDA.Web.Messaging.Kafka;
+using MDA.Web.Messaging.Service;
 
 namespace MDA.Web
 {
@@ -7,11 +9,24 @@ namespace MDA.Web
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
+            #region Default
             builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi();
+            builder.Services.AddOpenApi(); // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+            #endregion
+
+            #region Configuration
+            builder.Services.Configure<KafkaConsumerConfigOptions>(builder.Configuration.GetSection("KafkaConsumerConfig"));
+            #endregion
+
+            #region Background services
+            builder.Services.AddHostedService<KafkaConsumer>();
+            #endregion
+
+            #region Handlers
+            // Kafka Message Handlers
+            builder.Services.AddSingleton<IBNotificationKafkaHandler>()
+                            .AddSingleton<IBAccountUpdateKafkaHandler>();
+            #endregion
 
             var app = builder.Build();
 
