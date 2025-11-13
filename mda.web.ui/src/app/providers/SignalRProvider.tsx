@@ -1,4 +1,4 @@
-import { HubConnection } from "@microsoft/signalr";
+import { HubConnection, HubConnectionState } from "@microsoft/signalr";
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { createHubConnection } from "../../lib/signalr/createHubConnection";
 
@@ -15,26 +15,47 @@ export function SignalRProvider( { children }: { children: ReactNode }) {
 
 
     useEffect(() => {
-        const conn = connection;
+        let isDisposed = false;
 
-        conn
-            .start()
-            .then(() => setIsConnected(true))
-            .catch(err => {
-                console.error('SignalR connection error', err);
-                setIsConnected(false);
-            });
-
-        conn.onclose(() => setIsConnected(false));
+        connection.onclose(() => {
+            if (!isDisposed) {
+            setIsConnected(false);
+            }
+        });
+        
+        startConnection(isDisposed);
 
         return () => {
-            conn
-                .stop()
-                .catch(err => {
-                    console.error('Error stopping Signal', err)
-                })
-        }   
+            isDisposed = true;
+            if ( connection.state === HubConnectionState.Connected || connection.state === HubConnectionState.Reconnecting) {
+                connection
+                    .stop()
+                    .catch(err =>
+                        console.error('Error stopping SignalR connection', err),
+                    );
+            }
+
+            connection.onclose(null as any); // Optional: detach onclose to avoid accumulating handlers
+        }; 
     }, [connection])
+
+    async function startConnection(isDisposed: boolean) {
+        if (!connection) return;
+        
+        if (connection.state !== HubConnectionState.Disconnected) return;
+
+         try {
+            await connection.start();
+            if (!isDisposed) {
+            setIsConnected(true);
+            }
+        } catch (err) {
+            console.error('SignalR connection error', err);
+            if (!isDisposed) {
+            setIsConnected(false);
+            }
+        }
+    }
 
     const value = useMemo(
         () => ({ connection, isConnected }),
@@ -51,4 +72,3 @@ export function useSignalRContext() : SignalRContextValue {
     }
     return ctx;
 }
-
