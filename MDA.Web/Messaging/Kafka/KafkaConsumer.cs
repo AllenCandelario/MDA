@@ -24,94 +24,98 @@ namespace MDA.Web.Messaging.Kafka
             _ibAccountUpdateKafkaHandler = ibAccountUpdateKafkaHandler;
         }
 
-        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
+        protected override Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            var kafkaConfig = new ConsumerConfig
+
+            return Task.Run(async () =>
             {
-                BootstrapServers = _options.BootstrapServers,
-                GroupId = _options.GroupId,
-                EnableAutoCommit = _options.EnableAutoCommit,
-                MaxPollIntervalMs = _options.MaxPollIntervalMs,
-                SessionTimeoutMs = _options.SessionTimeoutMs
-            };
-
-            using var consumer = new ConsumerBuilder<string, string>(kafkaConfig)
-               .SetErrorHandler((_, e) =>
-               {
-                   if (e.IsFatal)
-                   {
-                       WebLog.KafkaFatal(_logger, e.Reason, (int)e.Code);
-                   }
-                   else
-                   {
-                       WebLog.KafkaWarn(_logger, e.Reason, (int)e.Code);
-                   }
-               })
-               .SetLogHandler((_, m) =>
-               {
-                    WebLog.KafkaLibLog(_logger, m.Facility, m.Message);
-               })
-               .Build();
-
-            WebLog.ConsumerStarting(_logger, _options.GroupId, string.Join(",", _options.Topics));
-            consumer.Subscribe(_options.Topics);
-
-            try
-            {
-                while (!cancellationToken.IsCancellationRequested)
+                var kafkaConfig = new ConsumerConfig
                 {
-                    ConsumeResult<string, string> cr;
+                    BootstrapServers = _options.BootstrapServers,
+                    GroupId = _options.GroupId,
+                    EnableAutoCommit = _options.EnableAutoCommit,
+                    MaxPollIntervalMs = _options.MaxPollIntervalMs,
+                    SessionTimeoutMs = _options.SessionTimeoutMs
+                };
 
-                    try
-                    {
-                        cr = consumer.Consume(cancellationToken);
-                    }
-                    catch (ConsumeException ex)
-                    {
-                        WebLog.ConsumeError(_logger, ex.Error.Reason, ex);
-                        continue; // try next poll
-                    }
+                using var consumer = new ConsumerBuilder<string, string>(kafkaConfig)
+                   .SetErrorHandler((_, e) =>
+                   {
+                       if (e.IsFatal)
+                       {
+                           WebLog.KafkaFatal(_logger, e.Reason, (int)e.Code);
+                       }
+                       else
+                       {
+                           WebLog.KafkaWarn(_logger, e.Reason, (int)e.Code);
+                       }
+                   })
+                   .SetLogHandler((_, m) =>
+                   {
+                       WebLog.KafkaLibLog(_logger, m.Facility, m.Message);
+                   })
+                   .Build();
 
-                    if (cr?.Message == null) continue;
+                WebLog.ConsumerStarting(_logger, _options.GroupId, string.Join(",", _options.Topics));
+                consumer.Subscribe(_options.Topics);
 
-                    try
-                    {
-                        await ProcessWithRetryAsync(cr, cancellationToken);
-
-                        if (!_options.EnableAutoCommit)
-                        {
-                            consumer.Commit(cr);
-                        }
-                    }
-                    catch (JsonException ex)
-                    {
-                        WebLog.JsonDeserError(_logger, cr.Topic, cr.Message.Key ?? "", cr.Message.Value?.Length ?? 0, ex);
-                        if (!_options.EnableAutoCommit)
-                        {
-                            consumer.Commit(cr); // skip bad message permanently
-                        }
-                    }
-                    catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
-                    catch (Exception ex)
-                    {
-                        WebLog.ProcessingFailed(_logger, cr.Topic, cr.Partition.Value, cr.Offset.Value, ex);
-                        // TODO: Consider kafka DLQ
-                        if (!_options.EnableAutoCommit)
-                        {
-                            consumer.Commit(cr); // skip bad message permanently
-                        }
-                    }
-                }
-            }
-            finally
-            {
                 try
                 {
-                    consumer.Close();
+                    while (!cancellationToken.IsCancellationRequested)
+                    {
+                        ConsumeResult<string, string> cr;
+
+                        try
+                        {
+                            cr = consumer.Consume(cancellationToken);
+                        }
+                        catch (ConsumeException ex)
+                        {
+                            WebLog.ConsumeError(_logger, ex.Error.Reason, ex);
+                            continue; // try next poll
+                        }
+
+                        if (cr?.Message == null) continue;
+
+                        try
+                        {
+                            await ProcessWithRetryAsync(cr, cancellationToken);
+
+                            if (!_options.EnableAutoCommit)
+                            {
+                                consumer.Commit(cr);
+                            }
+                        }
+                        catch (JsonException ex)
+                        {
+                            WebLog.JsonDeserError(_logger, cr.Topic, cr.Message.Key ?? "", cr.Message.Value?.Length ?? 0, ex);
+                            if (!_options.EnableAutoCommit)
+                            {
+                                consumer.Commit(cr); // skip bad message permanently
+                            }
+                        }
+                        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
+                        catch (Exception ex)
+                        {
+                            WebLog.ProcessingFailed(_logger, cr.Topic, cr.Partition.Value, cr.Offset.Value, ex);
+                            // TODO: Consider kafka DLQ
+                            if (!_options.EnableAutoCommit)
+                            {
+                                consumer.Commit(cr); // skip bad message permanently
+                            }
+                        }
+                    }
                 }
-                catch { }
-                WebLog.ConsumerStopped(_logger);
-            }
+                finally
+                {
+                    try
+                    {
+                        consumer.Close();
+                    }
+                    catch { }
+                    WebLog.ConsumerStopped(_logger);
+                }
+            }, cancellationToken);
         }
 
         // Process messages with a max retries of 3 and 100ms between each attempt

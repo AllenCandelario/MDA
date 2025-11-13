@@ -61,7 +61,9 @@ namespace MDA.Web
                 app.MapOpenApi();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
+
+            app.UseCors("client");
 
             app.UseAuthorization();
 
