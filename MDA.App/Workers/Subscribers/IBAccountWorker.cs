@@ -12,6 +12,8 @@ namespace MDA.App.Workers.Subscribers
 
         private readonly ILogger<IBAccountWorker> _logger;
 
+        private static readonly TimeSpan RefreshInterval = TimeSpan.FromSeconds(30);
+
         public IBAccountWorker(IBClient ib, ILogger<IBAccountWorker> logger)
         {
             _ib = ib;
@@ -29,6 +31,7 @@ namespace MDA.App.Workers.Subscribers
                 retries++;
             }
 
+            // Initial subscription
             if (_ib._accountUpdateSubscriptionReady)
             {
                 _ib.SubscribeToAccountUpdates(true);
@@ -37,6 +40,20 @@ namespace MDA.App.Workers.Subscribers
             else
             {
                 MDALog.AccountUpdateNotReadyAfterRetries(_logger);
+            }
+
+            // Periodic subscription (every 10s) to get a refreshed state of account updates even when there are no updates
+            while (!ct.IsCancellationRequested)
+            {
+                await Task.Delay(RefreshInterval, ct);
+                
+                MDALog.AccountUpdateResubscribeUnsub(_logger);
+                _ib.SubscribeToAccountUpdates(false);
+
+                await Task.Delay(2000); // Another 2s for unsub to complete
+                
+                MDALog.AccountUpdateResubscribeSub(_logger);
+                _ib.SubscribeToAccountUpdates(true);
             }
         }
 

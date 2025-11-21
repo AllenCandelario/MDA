@@ -35,6 +35,12 @@ namespace MDA.App.Log
         [LoggerMessage(EventId = 208, Level = LogLevel.Information, Message = "[AccountUpdate] Waiting for IB readiness... attempt={Attempt}")]
         public static partial void AccountUpdateWaitingForReadiness(ILogger logger, int Attempt);
 
+        [LoggerMessage(EventId = 209, Level = LogLevel.Information, Message = "[AccountUpdate] Refreshing subscription (unsub)")]
+        public static partial void AccountUpdateResubscribeUnsub(ILogger logger);
+
+        [LoggerMessage(EventId = 210, Level = LogLevel.Information, Message = "[AccountUpdate] Refreshing subscription (sub)")]
+        public static partial void AccountUpdateResubscribeSub(ILogger logger);
+
         [LoggerMessage(EventId = 410, Level = LogLevel.Warning, Message = "[AccountUpdate] IB not ready after retries. Skipping subscription.")]
         public static partial void AccountUpdateNotReadyAfterRetries(ILogger logger);
 
