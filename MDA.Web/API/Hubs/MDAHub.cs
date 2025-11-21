@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
-namespace MDA.Web
+namespace MDA.Web.API.Hubs
 {
     public sealed class MDAHub : Hub { }
 }

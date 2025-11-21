@@ -1,11 +1,11 @@
 ﻿using Confluent.Kafka;
+using MDA.Web.Application.Messaging.Kafka;
 using MDA.Web.Log;
-using MDA.Web.Messaging.Service;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 
-namespace MDA.Web.Messaging.Kafka
+namespace MDA.Web.Infrastructure.Messaging.Kafka
 {
     public sealed class KafkaConsumer : BackgroundService
     {

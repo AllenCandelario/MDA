@@ -1,5 +1,6 @@
-using MDA.Web.Messaging.Kafka;
-using MDA.Web.Messaging.Service;
+using MDA.Web.API.Hubs;
+using MDA.Web.Application.Messaging.Kafka;
+using MDA.Web.Infrastructure.Messaging.Kafka;
 
 namespace MDA.Web
 {

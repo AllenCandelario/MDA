@@ -1,6 +1,6 @@
 ﻿using MDA.Web.Log;
 
-namespace MDA.Web.Messaging.Service
+namespace MDA.Web.Application.Messaging.Kafka
 {
     public sealed class IBNotificationKafkaHandler
     {

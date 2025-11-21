@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using MDA.Web.API.Hubs;
+using Microsoft.AspNetCore.SignalR;
 
-namespace MDA.Web.Messaging.Service
+namespace MDA.Web.Application.Messaging.Kafka
 {
     public sealed class IBAccountUpdateKafkaHandler
     {

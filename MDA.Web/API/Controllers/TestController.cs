@@ -1,7 +1,6 @@
-﻿
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
-namespace MDA.Web.Controllers
+namespace MDA.Web.API.Controllers
 {
     [ApiController]
     [Route("api/test")]

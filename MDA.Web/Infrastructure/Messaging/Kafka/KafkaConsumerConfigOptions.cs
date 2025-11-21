@@ -1,6 +1,6 @@
 ﻿using Confluent.Kafka;
 
-namespace MDA.Web.Messaging.Kafka
+namespace MDA.Web.Infrastructure.Messaging.Kafka
 {
     public sealed class KafkaConsumerConfigOptions
     {
