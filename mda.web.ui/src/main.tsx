@@ -6,8 +6,6 @@ import { SignalRProvider } from './app/providers/SignalRProvider.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <SignalRProvider>
-      <App />
-    </SignalRProvider>
+    <App />
   </StrictMode>,
 )
