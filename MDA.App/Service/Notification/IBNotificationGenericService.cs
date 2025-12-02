@@ -1,4 +1,6 @@
-﻿using MDA.Model;
+﻿using Confluent.Kafka;
+using MDA.App.Log;
+using MDA.Model;
 using System.Text.Json;
 
 namespace MDA.App.Service.Notification
@@ -7,9 +9,14 @@ namespace MDA.App.Service.Notification
     {
         public IBNotificationGenericService() { }
 
-        public async Task HandleAsync(IBNotification notification, CancellationToken ct)
+        public Task HandleAsync(IBNotification n, CancellationToken ct)
         {
-            // Sampler handler for reference, do nothing
+            var value = JsonSerializer.Serialize(n);
+            string key = "Notification";
+
+            Console.WriteLine($"[IBNotification] Key = {key}, Value = {value}");
+
+            return Task.CompletedTask;
         }
     }
 }

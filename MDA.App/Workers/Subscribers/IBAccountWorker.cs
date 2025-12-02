@@ -43,18 +43,18 @@ namespace MDA.App.Workers.Subscribers
             }
 
             // Periodic subscription (every 10s) to get a refreshed state of account updates even when there are no updates
-            while (!ct.IsCancellationRequested)
-            {
-                await Task.Delay(RefreshInterval, ct);
+            //while (!ct.IsCancellationRequested)
+            //{
+            //    await Task.Delay(RefreshInterval, ct);
                 
-                MDALog.AccountUpdateResubscribeUnsub(_logger);
-                _ib.SubscribeToAccountUpdates(false);
+            //    MDALog.AccountUpdateResubscribeUnsub(_logger);
+            //    _ib.SubscribeToAccountUpdates(false);
 
-                await Task.Delay(2000); // Another 2s for unsub to complete
+            //    await Task.Delay(2000); // Another 2s for unsub to complete
                 
-                MDALog.AccountUpdateResubscribeSub(_logger);
-                _ib.SubscribeToAccountUpdates(true);
-            }
+            //    MDALog.AccountUpdateResubscribeSub(_logger);
+            //    _ib.SubscribeToAccountUpdates(true);
+            //}
         }
 
         public override Task StopAsync(CancellationToken ct)

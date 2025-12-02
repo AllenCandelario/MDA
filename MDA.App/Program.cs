@@ -8,6 +8,7 @@ using MDA.App.Service.AccountUpdate;
 using MDA.Config;
 using MDA.App.Infrastructure.Kafka;
 using Microsoft.Extensions.Configuration;
+using MDA.App.Service.MarketData;
 
 namespace MDA.App
 {
@@ -33,23 +34,30 @@ namespace MDA.App
                         .AddSingleton<IBClient>() // Main IBKR class 
 
                     #region Listeners, throws events to Handlers
-                        .AddHostedService<IBNotificationListener>() // Listener for notification events --> Passes to IBNotificationService
-                        .AddHostedService<IBAccountListener>() // Listener for account events --> Passes to IBAccountService
+                        .AddHostedService<IBNotificationListener>() // Listener for notification events --> Passes to Notification services
+                        .AddHostedService<IBAccountListener>() // Listener for account events --> Passes to AccountUpdate services
+                        .AddHostedService<IBMarketDataListener>() // Listener for market data events --> Passes to MarketData services
                     #endregion
 
                     #region Handlers
                         // IB Notifications
-                        .AddSingleton<INotificationHandler, IBNotificationTestLongService>()
+                        //.AddSingleton<INotificationHandler, IBNotificationGenericService>() // For debugging purposes
                         .AddSingleton<INotificationHandler, IBNotificationKafkaService>()
-                        //.AddSingleton<INotificationHandler, IBNotificationGenericService>()
+                        //.AddSingleton<INotificationHandler, IBNotificationTestLongService>()
 
                         // IB Account Updates
-                        //.AddSingleton<IAccountUpdateHandler, IBAccountUpdateGenericService>()
+                        //.AddSingleton<IAccountUpdateHandler, IBAccountUpdateGenericService>() // For debugging purposes
+                        .AddSingleton<IAccountUpdateHandler, IBAccountUpdateSubscribePortfolioMarketData>()
                         .AddSingleton<IAccountUpdateHandler, IBAccountUpdateKafkaService>()
+
+                        // IB Market Data
+                        //.AddSingleton<IMarketDataHandler, IBMarketDataGenericService>() // For debugging purposes
+                        .AddSingleton<IMarketDataHandler, IBMarketDataKafkaService>()
                     #endregion
 
                     #region Subscribers (auto-subscribes as background jobs)
                         .AddHostedService<IBConnectionWorker>() // Connects
+                        .AddHostedService<IBMarketDataWorker>() // Sets market data type 
                         .AddHostedService<IBAccountWorker>() // Subscribes to account events
                         ;
                     #endregion

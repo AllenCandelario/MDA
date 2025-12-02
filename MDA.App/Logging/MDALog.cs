@@ -7,10 +7,10 @@ namespace MDA.App.Log
         // 5xx = errors, 4xx = warnings, 2xx = info, 1xx = debug (suggested scheme)
 
         // Listener & connections/subscriptions
-        [LoggerMessage(EventId = 200, Level = LogLevel.Information, Message = "Notification listener attached")]
+        [LoggerMessage(EventId = 200, Level = LogLevel.Information, Message = "[Notification] Listener attached")]
         public static partial void NotificationListenerAttached(ILogger logger);
 
-        [LoggerMessage(EventId = 201, Level = LogLevel.Information, Message = "Notification listener detached")]
+        [LoggerMessage(EventId = 201, Level = LogLevel.Information, Message = "[Notification] Listener detached")]
         public static partial void NotificationListenerDetached(ILogger logger);
 
         [LoggerMessage(EventId = 202, Level = LogLevel.Information, Message = "IBKR Connected")]
@@ -43,6 +43,21 @@ namespace MDA.App.Log
 
         [LoggerMessage(EventId = 410, Level = LogLevel.Warning, Message = "[AccountUpdate] IB not ready after retries. Skipping subscription.")]
         public static partial void AccountUpdateNotReadyAfterRetries(ILogger logger);
+
+
+        [LoggerMessage(EventId = 211, Level = LogLevel.Information, Message = "[MarketData] Subscribed to delayed market data")]
+        public static partial void MarketDataSubscribeDelayed(ILogger logger);
+
+        [LoggerMessage(EventId = 212, Level = LogLevel.Information, Message = "[MarketData] Unsubscribed all")]
+        public static partial void MarketDataUnsubscribeAll(ILogger logger);
+
+        [LoggerMessage(EventId = 213, Level = LogLevel.Information, Message = "[MarketData] Contract {ContractId} with Request {RequestId} already subscdribed")]
+        public static partial void MarketDataAlreadySubscribed(ILogger logger, int ContractId, int RequestId);
+        [LoggerMessage(EventId = 214, Level = LogLevel.Information, Message = "[Market Data] Listener attached")]
+        public static partial void MarketDataListenerAttached(ILogger logger);
+
+        [LoggerMessage(EventId = 215, Level = LogLevel.Information, Message = "[Market Data] Listener detached")]
+        public static partial void MarketDataListenerDetached(ILogger logger);
 
 
 

@@ -14,6 +14,7 @@ namespace MDA.App.Infrastructure.Kafka
 
         public string NotificationTopic { get; set; }
         public string AccountUpdateTopic { get; set; }
+        public string MarketDataTopic { get; set; }
 
     }
 }
