@@ -15,55 +15,10 @@ namespace MDA.Implementation
             throw new NotImplementedException("currentTime");
         }
 
-        public void tickPrice(int tickerId, int field, double price, TickAttrib attrib)
-        {
-            DiscardImplementation(tickerId, field, price, attrib);
-            throw new NotImplementedException("tickPrice");
-        }
-
-        public void tickSize(int tickerId, int field, decimal size)
-        {
-            DiscardImplementation(tickerId, field, size);
-            throw new NotImplementedException("tickSize");
-        }
-
-        public void tickString(int tickerId, int tickType, string value)
-        {
-            DiscardImplementation(tickerId, tickType, value);
-            throw new NotImplementedException("tickString");
-        }
-
-        public void tickGeneric(int tickerId, int tickType, double value)
-        {
-            DiscardImplementation(tickerId, tickType, value);
-            throw new NotImplementedException("tickGeneric");
-        }
-
-        public void tickEFP(int tickerId, int tickType, double basisPoints, string formattedBasisPoints,
-            double impliedFuture, int holdDays, string futureLastTradeDate, double dividendImpact, double dividendsToLastTradeDate)
-        {
-            DiscardImplementation(tickerId, tickType, basisPoints, formattedBasisPoints, impliedFuture, holdDays,
-                futureLastTradeDate, dividendImpact, dividendsToLastTradeDate);
-            throw new NotImplementedException("tickEFP");
-        }
-
         public void deltaNeutralValidation(int reqId, DeltaNeutralContract deltaNeutralContract)
         {
             DiscardImplementation(reqId, deltaNeutralContract);
             throw new NotImplementedException("deltaNeutralValidation");
-        }
-
-        public void tickOptionComputation(int tickerId, int tickType, int tickAttrib, double impliedVolatility, double delta,
-            double optPrice, double pvDividend, double gamma, double vega, double theta, double undPrice)
-        {
-            DiscardImplementation(tickerId, tickType, tickAttrib, impliedVolatility, delta, optPrice, pvDividend, gamma, vega, theta, undPrice);
-            throw new NotImplementedException("tickOptionComputation");
-        }
-
-        public void tickSnapshotEnd(int tickerId)
-        {
-            DiscardImplementation(tickerId);
-            throw new NotImplementedException("tickSnapshotEnd");
         }
 
         public void bondContractDetails(int reqId, ContractDetails contractDetails)
@@ -142,12 +97,6 @@ namespace MDA.Implementation
         {
             DiscardImplementation(reqId, startDate, endDate);
             throw new NotImplementedException("historicalDataEnd");
-        }
-
-        public void marketDataType(int reqId, int marketDataType)
-        {
-            DiscardImplementation(reqId, marketDataType);
-            throw new NotImplementedException("marketDataType");
         }
 
         public void updateMktDepth(int tickerId, int position, int operation, int side, double price, decimal size)
@@ -315,12 +264,6 @@ namespace MDA.Implementation
         {
             DiscardImplementation(reqId, theMap);
             throw new NotImplementedException("smartComponents");
-        }
-
-        public void tickReqParams(int tickerId, double minTick, string bboExchange, int snapshotPermissions)
-        {
-            DiscardImplementation(tickerId, minTick, bboExchange, snapshotPermissions);
-            throw new NotImplementedException("tickReqParams");
         }
 
         public void newsProviders(NewsProvider[] newsProviders)
