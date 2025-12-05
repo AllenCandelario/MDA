@@ -6,7 +6,6 @@ namespace MDA.Implementation
 {
     public partial class IBClient : EWrapper
     {
-        private int _nextMarketDataRequestId = 0;
         private readonly HashSet<int> _activeMarketDataRequestIds = new();
 
         public event Action<IBMarketData> MarketDataReceived;
@@ -18,14 +17,19 @@ namespace MDA.Implementation
 
         public int SubscribeToMarketData(Contract contract, string commaSeparatedGenericTickList = "", bool snapshot = false, bool regulatorySnapshot = false, List<TagValue>? mktDataOptions = null)
         {
-            int requestId = Interlocked.Increment(ref _nextMarketDataRequestId);
-            _activeMarketDataRequestIds.Add(requestId);
+            _activeMarketDataRequestIds.Add(contract.ConId);
             
-            IBLogging.MarketDataSub(_logger, contract.Symbol, requestId);
-            _clientSocket.reqMktData(requestId, contract, commaSeparatedGenericTickList, snapshot, regulatorySnapshot, mktDataOptions);
-
-            _activeMarketDataRequestIds.Add(requestId);
-            return requestId;
+            IBLogging.MarketDataSub(_logger, contract.Symbol, contract.ConId);
+            if (!_activeMarketDataRequestIds.Contains(contract.ConId))
+            {
+                _clientSocket.reqMktData(contract.ConId, contract, commaSeparatedGenericTickList, snapshot, regulatorySnapshot, mktDataOptions);
+                _activeMarketDataRequestIds.Add(contract.ConId);
+            }
+            else
+            {
+                IBLogging.MarketDataAlreadySub(_logger, contract.Symbol, contract.ConId);
+            }
+            return contract.ConId;
         }
 
         public void CancelMarketData(int requestId)

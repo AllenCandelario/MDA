@@ -54,6 +54,8 @@ namespace MDA.Config
 
         [LoggerMessage(EventId = 233, Level = LogLevel.Information, Message = "[MarketData] Remaining uncancelled reqIds = {requestIds}")]
         public static partial void MarketDataCancelAllRemaining(ILogger logger, string requestIds);
+        [LoggerMessage(EventId = 234, Level = LogLevel.Information, Message = "[MarketData] Already subscribed market data for symbol={Symbol} with request/contractId = {ContractId}")]
+        public static partial void MarketDataAlreadySub(ILogger logger, string SYmbol, int ContractId);
 
         #endregion
 
