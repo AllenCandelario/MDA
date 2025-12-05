@@ -1,5 +1,7 @@
 ﻿using Confluent.Kafka;
-using MDA.Web.Application.Messaging.Kafka;
+using MDA.Web.Application.Accounts.Service;
+using MDA.Web.Application.Instruments.Service;
+using MDA.Web.Application.Notifications.Service;
 using MDA.Web.Log;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.Extensions.Options;
@@ -12,16 +14,13 @@ namespace MDA.Web.Infrastructure.Messaging.Kafka
 
         private readonly ILogger<KafkaConsumer> _logger;
         private readonly KafkaConsumerConfigOptions _options;
+        private readonly IServiceScopeFactory _scopeFactory;
 
-        // per topic handlers
-        private readonly IBNotificationKafkaHandler _ibNotificationKafkaHandler;
-        private readonly IBAccountUpdateKafkaHandler _ibAccountUpdateKafkaHandler;
-        public KafkaConsumer(IOptions<KafkaConsumerConfigOptions> options, ILogger<KafkaConsumer> logger, IBNotificationKafkaHandler ibNotificationKafkaHandler, IBAccountUpdateKafkaHandler ibAccountUpdateKafkaHandler) 
+        public KafkaConsumer(IOptions<KafkaConsumerConfigOptions> options, ILogger<KafkaConsumer> logger, IServiceScopeFactory scopeFactory) 
         {
             _options = options.Value;
             _logger = logger;
-            _ibNotificationKafkaHandler = ibNotificationKafkaHandler;
-            _ibAccountUpdateKafkaHandler = ibAccountUpdateKafkaHandler;
+            _scopeFactory = scopeFactory;
         }
 
         protected override Task ExecuteAsync(CancellationToken cancellationToken)
@@ -144,14 +143,25 @@ namespace MDA.Web.Infrastructure.Messaging.Kafka
         /// </summary>
         private async Task ProcessByTopicAsync(ConsumeResult<string, string> cr, CancellationToken ct)
         {
+
+            // Single scope per message
+            using var scope = _scopeFactory.CreateScope();
+            var sp = scope.ServiceProvider;
+
             // TODO: might need to add a cancellation token condition for processing to not be more than x seconds
             switch (cr.Topic)
             {
                 case "dev.mda.ib.notification.v1":
-                    await _ibNotificationKafkaHandler.HandleAsync(cr.Message.Value, ct);
+                    var notificationHandler = sp.GetRequiredService<IBNotificationService>();
+                    await notificationHandler.HandleKafkaMessageAsync(cr.Message.Value, ct);
                     break;
                 case "dev.mda.ib.account.update.v1":
-                    await _ibAccountUpdateKafkaHandler.HandleAsync(cr.Message.Value, ct);
+                    var accountUpdateHandler = sp.GetRequiredService<AccountService>();
+                    await accountUpdateHandler.HandleKafkaMessageAsync(cr.Message.Key, cr.Message.Value, ct);
+                    break;
+                case "dev.mda.ib.market.data.v1":
+                    var marketDataHandler = sp.GetRequiredService<InstrumentService>();
+                    await marketDataHandler.HandleKafkaMessageAsync(cr.Message.Value, ct);
                     break;
                 default:
                     WebLog.UnhandledTopic(_logger, cr.Topic, cr.Message.Key, cr.Message.Value?.Length ?? 0);

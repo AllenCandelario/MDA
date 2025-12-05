@@ -1,6 +1,15 @@
 using MDA.Web.API.Hubs;
-using MDA.Web.Application.Messaging.Kafka;
+using MDA.Web.Application.Accounts;
+using MDA.Web.Application.Accounts.Service;
+using MDA.Web.Application.Categories;
+using MDA.Web.Application.Holdings;
+using MDA.Web.Application.Instruments;
+using MDA.Web.Application.Instruments.Service;
+using MDA.Web.Application.Notifications.Service;
 using MDA.Web.Infrastructure.Messaging.Kafka;
+using MDA.Web.Infrastructure.Persistence;
+using MDA.Web.Infrastructure.Persistence.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace MDA.Web
 {
@@ -44,14 +53,30 @@ namespace MDA.Web
 
             #endregion
 
+            #region Database
+
+            builder.Services.AddDbContext<MdaDbContext>(opt =>
+            {
+                var connectionString = builder.Configuration.GetConnectionString("MdaDb");
+                opt.UseNpgsql(connectionString);
+            });
+
+            builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+            builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+            builder.Services.AddScoped<IHoldingRepository, HoldingRepository>();
+            builder.Services.AddScoped<IInstrumentRepository, InstrumentRepository>();
+
+            #endregion 
+
             #region Background services
             builder.Services.AddHostedService<KafkaConsumer>();
             #endregion
 
             #region Handlers
             // Kafka Message Handlers
-            builder.Services.AddSingleton<IBNotificationKafkaHandler>()
-                            .AddSingleton<IBAccountUpdateKafkaHandler>();
+            builder.Services.AddScoped<IBNotificationService>()
+                            .AddScoped<AccountService>()
+                            .AddScoped<InstrumentService>();
             #endregion
 
             var app = builder.Build();
