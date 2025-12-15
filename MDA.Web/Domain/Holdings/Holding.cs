@@ -46,8 +46,6 @@ namespace MDA.Web.Domain.Holdings
         {
             if (quantity < 0) throw new ArgumentOutOfRangeException(nameof(quantity));
             if (averagePrice < 0) throw new ArgumentOutOfRangeException(nameof(averagePrice));
-            if (unrealizedPNL < 0) throw new ArgumentOutOfRangeException(nameof(unrealizedPNL));
-            if (realizedPNL < 0) throw new ArgumentOutOfRangeException(nameof(realizedPNL));
 
             Quantity = quantity;
             AveragePrice = averagePrice;

@@ -72,8 +72,7 @@ namespace MDA.Web
             builder.Services.AddHostedService<KafkaConsumer>();
             #endregion
 
-            #region Handlers
-            // Kafka Message Handlers
+            #region Services
             builder.Services.AddScoped<IBNotificationService>()
                             .AddScoped<AccountService>()
                             .AddScoped<InstrumentService>();

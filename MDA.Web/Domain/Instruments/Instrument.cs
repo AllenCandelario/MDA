@@ -7,8 +7,8 @@ namespace MDA.Web.Domain.Instruments
         public Guid Id { get; private set; }
         public string Symbol { get; private set; } = null!;
         public string Name { get; private set; } = null!;
-        public int IbkrConId { get; private set; } // TODO: Not sure what this is for, double check 
-        public string AssetClass { get; private set; } = "Stock"; // TODO: Enum / const?
+        public int IbkrConId { get; private set; }
+        public string AssetClass { get; private set; }
 
         // Frequently updated data, nullable if details cannot be retrieved
         public decimal? LastPrice { get; private set; }

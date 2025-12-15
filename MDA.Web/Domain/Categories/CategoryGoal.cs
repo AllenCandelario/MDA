@@ -14,6 +14,8 @@
 
         public CategoryGoal(Guid categoryId, GoalHorizon horizon, decimal targetWeightPercent)
         {
+            if (targetWeightPercent < 0 || targetWeightPercent > 100) throw new ArgumentOutOfRangeException(nameof(targetWeightPercent));
+
             Id = Guid.NewGuid();
             CategoryId = categoryId;
             Horizon = horizon;

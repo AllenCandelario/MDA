@@ -10,13 +10,17 @@ namespace MDA.Web.Infrastructure.Persistence.Configurations
         {
             builder.HasKey(g => g.Id);
 
-            builder.Property(g => g.TargetWeightPercent)
-                   .HasColumnType("numeric(5,2)");
-
             builder.HasOne(g => g.Category)
-                   .WithMany(c => c.Goals)
-                   .HasForeignKey(g => g.CategoryId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                .WithMany(c => c.Goals)
+                .HasForeignKey(g => g.CategoryId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Property(g => g.Horizon)
+                .HasConversion<string>()
+                .HasMaxLength(32);
+
+            builder.Property(g => g.TargetWeightPercent)
+                .HasColumnType("numeric(5,2)");
         }
     }
 }

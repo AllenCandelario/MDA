@@ -10,14 +10,14 @@ namespace MDA.Web.Infrastructure.Persistence.Configurations
         {
             builder.HasKey(c => c.Id);
 
-            builder.Property(c => c.Name)
-                   .IsRequired()
-                   .HasMaxLength(64);
-
             builder.HasOne(c => c.Account)
-                   .WithMany(a => a.Categories)
-                   .HasForeignKey(c => c.AccountId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                .WithMany(a => a.Categories)
+                .HasForeignKey(c => c.AccountId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Property(c => c.Name)
+                .IsRequired()
+                .HasMaxLength(128);
         }
     }
 }

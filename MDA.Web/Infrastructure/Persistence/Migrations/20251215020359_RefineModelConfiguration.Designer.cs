@@ -3,6 +3,7 @@ using System;
 using MDA.Web.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MDA.Web.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(MdaDbContext))]
-    partial class MdaDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251215020359_RefineModelConfiguration")]
+    partial class RefineModelConfiguration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
