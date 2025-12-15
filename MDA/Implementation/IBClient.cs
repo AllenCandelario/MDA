@@ -77,5 +77,10 @@ namespace MDA.Implementation
         {
             IBLogging.NextValidId(_logger, orderId);
         }
+
+        void EWrapper.updateNewsBulletin(int msgId, int msgType, string message, string origin)
+        {
+            Console.WriteLine("Incoming news bulletin, ignoring");
+        }
     }
 }

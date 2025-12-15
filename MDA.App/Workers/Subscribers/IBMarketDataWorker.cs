@@ -24,7 +24,7 @@ namespace MDA.App.Workers.Subscribers
 
         protected override async Task ExecuteAsync(CancellationToken ct)
         {
-            _ib.SubscribeToMarketDataTypeDelayed();
+            _ib.SubscribeToDelayedMarketDataType();
             MDALog.MarketDataSubscribeDelayed(_logger);
             // actual subscription is reliant on account update portfolio data. It'll be handled in an event handler from account updates
         }

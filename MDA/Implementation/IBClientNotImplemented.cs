@@ -111,12 +111,6 @@ namespace MDA.Implementation
             throw new NotImplementedException("updateMktDepthL2");
         }
 
-        public void updateNewsBulletin(int msgId, int msgType, string message, string origin)
-        {
-            DiscardImplementation(msgId, msgType, message, origin);
-            throw new NotImplementedException("updateNewsBulletin");
-        }
-
         public void position(string account, Contract contract, decimal position, double avgCost)
         {
             DiscardImplementation(account, contract, position, avgCost);
