@@ -1,40 +1,39 @@
 ﻿using IBApi;
 using MDA.Config;
 using MDA.Model;
+using System.Collections.Concurrent;
 
 namespace MDA.Implementation
 {
     public partial class IBClient : EWrapper
     {
-        private readonly HashSet<int> _activeMarketDataRequestIds = new();
+        // multiple requests to subscribe to market data may happen, use a thread safe collection. Value (byte) is just dummy data
+        private readonly ConcurrentDictionary<int, byte> _activeMarketDataRequestIds = new();
 
         public event Action<IBMarketData> MarketDataReceived;
 
-        public void SubscribeToMarketDataTypeDelayed()
+        public void SubscribeToDelayedMarketDataType()
         {
             _clientSocket.reqMarketDataType(3);
         }
 
         public int SubscribeToMarketData(Contract contract, string commaSeparatedGenericTickList = "", bool snapshot = false, bool regulatorySnapshot = false, List<TagValue>? mktDataOptions = null)
-        {
-            _activeMarketDataRequestIds.Add(contract.ConId);
-            
+        {   
             IBLogging.MarketDataSub(_logger, contract.Symbol, contract.ConId);
-            if (!_activeMarketDataRequestIds.Contains(contract.ConId))
+            if (!_activeMarketDataRequestIds.TryAdd(contract.ConId, 0))
             {
-                _clientSocket.reqMktData(contract.ConId, contract, commaSeparatedGenericTickList, snapshot, regulatorySnapshot, mktDataOptions);
-                _activeMarketDataRequestIds.Add(contract.ConId);
+                IBLogging.MarketDataAlreadySub(_logger, contract.Symbol, contract.ConId);
             }
             else
             {
-                IBLogging.MarketDataAlreadySub(_logger, contract.Symbol, contract.ConId);
+                _clientSocket.reqMktData(contract.ConId, contract, commaSeparatedGenericTickList, snapshot, regulatorySnapshot, mktDataOptions);
             }
             return contract.ConId;
         }
 
         public void CancelMarketData(int requestId)
         {
-            if (_activeMarketDataRequestIds.Remove(requestId))
+            if (_activeMarketDataRequestIds.TryRemove(requestId, out _))
             {
                 IBLogging.MarketDataCancel(_logger, requestId);
                 _clientSocket.cancelMktData(requestId);
@@ -47,17 +46,19 @@ namespace MDA.Implementation
 
         public void CancelAllMarketData()
         {
-            var requestIds = _activeMarketDataRequestIds.ToList();
+            var requestIds = _activeMarketDataRequestIds.Keys.ToList();
 
             foreach (var reqId in requestIds)
             {
                 CancelMarketData(reqId);
             }
 
-            if (_activeMarketDataRequestIds.Count > 0)
+            if (!_activeMarketDataRequestIds.IsEmpty)
             {
-                string remaining = string.Join(", ", _activeMarketDataRequestIds);
+                var remainingIds = _activeMarketDataRequestIds.Keys.ToList();
+                string remaining = string.Join(", ", remainingIds);
                 IBLogging.MarketDataCancelAllRemaining(_logger, remaining);
+
                 _activeMarketDataRequestIds.Clear();
             }
         }
