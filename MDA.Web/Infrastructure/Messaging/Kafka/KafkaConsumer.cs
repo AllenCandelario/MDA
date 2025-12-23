@@ -161,7 +161,7 @@ namespace MDA.Web.Infrastructure.Messaging.Kafka
                     break;
                 case "dev.mda.ib.market.data.v1":
                     var marketDataHandler = sp.GetRequiredService<InstrumentService>();
-                    await marketDataHandler.HandleKafkaMessageAsync(cr.Message.Value, ct);
+                    await marketDataHandler.HandleKafkaMessageAsync(cr.Message.Key, cr.Message.Value, ct);
                     break;
                 default:
                     WebLog.UnhandledTopic(_logger, cr.Topic, cr.Message.Key, cr.Message.Value?.Length ?? 0);

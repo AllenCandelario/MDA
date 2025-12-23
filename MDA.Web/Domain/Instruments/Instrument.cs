@@ -25,7 +25,7 @@ namespace MDA.Web.Domain.Instruments
         // Constructors
         public Instrument() { } // EF
 
-        public Instrument(string symbol, string name, int ibkrConId, string assetClass = "Stock")
+        public Instrument(string symbol, string name, int ibkrConId, string assetClass)
         {
             Id = Guid.NewGuid();
             Symbol = symbol;
@@ -34,14 +34,27 @@ namespace MDA.Web.Domain.Instruments
             AssetClass = assetClass;
         }
 
-        public void UpdateMarketData(decimal lastPrice, DateTime updatedUtc, decimal? pe = null, decimal? forwardPe = null, decimal? week52High = null, decimal? ath = null)
+        public void Update52WeekHigh(decimal week52High)
+        {
+            Week52High = week52High;
+        }
+
+        public void UpdateLastPrice(decimal lastPrice)
         {
             LastPrice = lastPrice;
             LastPriceUpdatedUtc = DateTime.UtcNow;
-            Pe = pe ?? Pe;
-            ForwardPe = forwardPe ?? ForwardPe;
-            Week52High = week52High ?? Week52High;
-            Ath = ath ?? Ath;
+        }
+
+        // PEs may be nullable
+        public void UpdatePeRatios(decimal? pe, decimal? forwardPe)
+        {
+            if (pe.HasValue) Pe = pe.Value;
+            if (forwardPe.HasValue) ForwardPe = forwardPe.Value;
+        }
+
+        public void UpdateATH(decimal ath)
+        {
+            Ath = ath;
         }
     }
 }
