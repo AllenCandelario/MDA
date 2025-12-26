@@ -1,18 +1,20 @@
 ﻿using MDA.Web.API.Hubs;
 using MDA.Web.Application.Accounts.Contracts;
 using MDA.Web.Application.Instruments.Contracts;
+using MDA.Web.Application.Instruments.Interfaces;
+using MDA.Web.Application.Shared;
 using MDA.Web.Domain.Accounts;
 using Microsoft.AspNetCore.SignalR;
 using System.Text.Json;
 
-namespace MDA.Web.Application.Instruments.Service
+namespace MDA.Web.Application.Instruments.Services
 {
-    public sealed class InstrumentService
+    public sealed class InstrumentKafkaMessageHandler : IKafkaMessageHandler
     {
-        private readonly ILogger<InstrumentService> _logger;
+        private readonly ILogger<InstrumentKafkaMessageHandler> _logger;
         private readonly IHubContext<MDAHub> _hub;
         private readonly IInstrumentRepository _instrumentRepository;
-        public InstrumentService(ILogger<InstrumentService> logger, IHubContext<MDAHub> hub, IInstrumentRepository instrumentRepository)
+        public InstrumentKafkaMessageHandler(ILogger<InstrumentKafkaMessageHandler> logger, IHubContext<MDAHub> hub, IInstrumentRepository instrumentRepository)
         {
             _logger = logger;
             _hub = hub;

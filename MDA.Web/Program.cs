@@ -1,11 +1,14 @@
 using MDA.Web.API.Hubs;
-using MDA.Web.Application.Accounts;
-using MDA.Web.Application.Accounts.Service;
-using MDA.Web.Application.Categories;
-using MDA.Web.Application.Holdings;
-using MDA.Web.Application.Instruments;
-using MDA.Web.Application.Instruments.Service;
-using MDA.Web.Application.Notifications.Service;
+using MDA.Web.Application.Accounts.Interfaces;
+using MDA.Web.Application.Accounts.Services;
+using MDA.Web.Application.Categories.Interfaces;
+using MDA.Web.Application.Categories.Services;
+using MDA.Web.Application.Holdings.Interfaces;
+using MDA.Web.Application.Holdings.Services;
+using MDA.Web.Application.Instruments.Interfaces;
+using MDA.Web.Application.Instruments.Services;
+using MDA.Web.Application.Notifications.Services;
+using MDA.Web.Application.Shared;
 using MDA.Web.Infrastructure.Messaging.Kafka;
 using MDA.Web.Infrastructure.Persistence;
 using MDA.Web.Infrastructure.Persistence.Repositories;
@@ -73,9 +76,17 @@ namespace MDA.Web
             #endregion
 
             #region Services
-            builder.Services.AddScoped<IBNotificationService>()
-                            .AddScoped<AccountService>()
-                            .AddScoped<InstrumentService>();
+
+            // Kafka message handlers
+            builder.Services.AddKeyedScoped<IKafkaMessageHandler, IBNotificationKafkaMessageHandler>("dev.mda.ib.notification.v1")
+                            .AddKeyedScoped<IKafkaMessageHandler, AccountKafkaMessageHandler>("dev.mda.ib.account.update.v1")
+                            .AddKeyedScoped<IKafkaMessageHandler, InstrumentKafkaMessageHandler>("dev.mda.ib.market.data.v1");
+
+            // REST API handlers
+            builder.Services.AddScoped<IAccountQueries, AccountQueries>()
+                            .AddScoped<ICategoryQueries, CategoryQueries>()
+                            .AddScoped<IHoldingQueries, HoldingQueries>()
+                            .AddScoped<IInstrumentQueries, InstrumentQueries>();
             #endregion
 
             var app = builder.Build();

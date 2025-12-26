@@ -1,6 +1,6 @@
 ﻿using MDA.Web.Domain.Instruments;
 
-namespace MDA.Web.Application.Instruments
+namespace MDA.Web.Application.Instruments.Interfaces
 {
     public interface IInstrumentRepository
     {

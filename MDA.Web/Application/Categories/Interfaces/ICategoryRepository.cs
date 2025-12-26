@@ -1,7 +1,7 @@
 ﻿using MDA.Web.Domain.Accounts;
 using MDA.Web.Domain.Categories;
 
-namespace MDA.Web.Application.Categories
+namespace MDA.Web.Application.Categories.Interfaces
 {
     public interface ICategoryRepository
     {

@@ -1,4 +1,4 @@
-﻿using MDA.Web.Application.Instruments;
+﻿using MDA.Web.Application.Instruments.Interfaces;
 using MDA.Web.Domain.Instruments;
 using Microsoft.EntityFrameworkCore;
 

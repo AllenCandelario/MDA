@@ -1,4 +1,5 @@
 ﻿using MDA.Web.Application.Holdings;
+using MDA.Web.Application.Holdings.Interfaces;
 using MDA.Web.Domain.Holdings;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +12,15 @@ namespace MDA.Web.Infrastructure.Persistence.Repositories
         public HoldingRepository(MdaDbContext dbContext)
         {
             _db = dbContext;
+        }
+
+        public async Task<IReadOnlyList<Holding>?> GetFullDetailsByAccountAsync(Guid accountId, CancellationToken ct)
+        {
+            return await _db.Holdings
+                .Where(h => h.AccountId == accountId)
+                .Include(h => h.Instrument)
+                .Include(h => h.Category)
+                .ToListAsync(ct);
         }
 
         public async Task<Holding?> GetByAccountAndInstrumentAsync(Guid accountId, Guid instrumentId, CancellationToken ct)

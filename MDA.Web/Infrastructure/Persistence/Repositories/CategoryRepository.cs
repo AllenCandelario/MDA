@@ -1,4 +1,4 @@
-﻿using MDA.Web.Application.Categories;
+﻿using MDA.Web.Application.Categories.Interfaces;
 using MDA.Web.Domain.Categories;
 using Microsoft.EntityFrameworkCore;
 

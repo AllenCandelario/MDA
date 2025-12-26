@@ -1,7 +1,8 @@
 ﻿using Confluent.Kafka;
-using MDA.Web.Application.Accounts.Service;
-using MDA.Web.Application.Instruments.Service;
-using MDA.Web.Application.Notifications.Service;
+using MDA.Web.Application.Accounts.Services;
+using MDA.Web.Application.Instruments.Services;
+using MDA.Web.Application.Notifications.Services;
+using MDA.Web.Application.Shared;
 using MDA.Web.Log;
 using Microsoft.AspNetCore.DataProtection.KeyManagement;
 using Microsoft.Extensions.Options;
@@ -149,23 +150,20 @@ namespace MDA.Web.Infrastructure.Messaging.Kafka
             var sp = scope.ServiceProvider;
 
             // TODO: might need to add a cancellation token condition for processing to not be more than x seconds
-            switch (cr.Topic)
+            try
             {
-                case "dev.mda.ib.notification.v1":
-                    var notificationHandler = sp.GetRequiredService<IBNotificationService>();
-                    await notificationHandler.HandleKafkaMessageAsync(cr.Message.Value, ct);
-                    break;
-                case "dev.mda.ib.account.update.v1":
-                    var accountUpdateHandler = sp.GetRequiredService<AccountService>();
-                    await accountUpdateHandler.HandleKafkaMessageAsync(cr.Message.Key, cr.Message.Value, ct);
-                    break;
-                case "dev.mda.ib.market.data.v1":
-                    var marketDataHandler = sp.GetRequiredService<InstrumentService>();
-                    await marketDataHandler.HandleKafkaMessageAsync(cr.Message.Key, cr.Message.Value, ct);
-                    break;
-                default:
-                    WebLog.UnhandledTopic(_logger, cr.Topic, cr.Message.Key, cr.Message.Value?.Length ?? 0);
-                    break;
+                var handler = sp.GetRequiredKeyedService<IKafkaMessageHandler>(cr.Topic);
+
+                await handler.HandleKafkaMessageAsync(
+                    cr.Message.Key ?? "",
+                    cr.Message.Value,
+                    ct
+                );
+            }
+            catch (InvalidOperationException)
+            {
+                // No keyed handler registered for this topic
+                WebLog.UnhandledTopic(_logger, cr.Topic, cr.Message.Key, cr.Message.Value?.Length ?? 0);
             }
         }
     }

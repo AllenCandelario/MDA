@@ -1,20 +1,22 @@
 ﻿using MDA.Web.Application.Accounts.Contracts;
-using MDA.Web.Application.Holdings;
-using MDA.Web.Application.Instruments;
+using MDA.Web.Application.Accounts.Interfaces;
+using MDA.Web.Application.Holdings.Interfaces;
+using MDA.Web.Application.Instruments.Interfaces;
+using MDA.Web.Application.Shared;
 using MDA.Web.Domain.Accounts;
 using MDA.Web.Domain.Holdings;
 using MDA.Web.Domain.Instruments;
 using System.Text.Json;
 
-namespace MDA.Web.Application.Accounts.Service
+namespace MDA.Web.Application.Accounts.Services
 {
-    public sealed class AccountService
+    public sealed class AccountKafkaMessageHandler : IKafkaMessageHandler
     {
-        private readonly ILogger<AccountService> _logger;
+        private readonly ILogger<AccountKafkaMessageHandler> _logger;
         private readonly IAccountRepository _accountRepository;
         private readonly IHoldingRepository _holdingRepository;
         private readonly IInstrumentRepository _instrumentRepository;
-        public AccountService(ILogger<AccountService> logger, IAccountRepository accountRepository, IHoldingRepository holdingRepository, IInstrumentRepository instrumentRepository)
+        public AccountKafkaMessageHandler(ILogger<AccountKafkaMessageHandler> logger, IAccountRepository accountRepository, IHoldingRepository holdingRepository, IInstrumentRepository instrumentRepository)
         {
             // TODO: Proper logging
             _logger = logger;
