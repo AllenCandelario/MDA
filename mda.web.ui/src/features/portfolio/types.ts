@@ -1,48 +1,53 @@
-export type AccountId = string;
+
 
 export type PortfolioSummary = {
-  accountId: AccountId;
+  ibkrAccountId: string;
+  baseCurrency: string;
+  accountType: string;
+  lastUpdatedUtc: string; 
   totalPortfolioValue: number;   // base currency
   settledCash: number;           // base currency
   excessLiquidity: number;       // base currency
   buyingPower: number;           // base currency
   investedAsset: number;         // derived (total - settled)
   dailyPnL: number;              // base currency
-  unrealizedPnL: number;         // base currency
-  expectedDividendsYear: number; // base currency
-  dividendsPaidYtd: number;      // base currency
+  unrealizedPnl: number;         // base currency
+  // expectedDividendsYear: number; // base currency
+  // dividendsPaidYtd: number;      // base currency
 };
 
-export type HoldingCategory = "Semiconductor" | "AI" | "Energy" | "ETF" | "Other";
+export type HoldingCategory = "Semiconductor" | "AI" | "Energy" | "ETF" | "Other" | "Uncategorized";
+
+export type Holdings = { holdings: Holding[]; }
 
 export type Holding = {
   symbol: string;
   name: string;
   currency: string; // e.g. USD
   category: HoldingCategory;
-  lastPrice: number;
-  changeAbs: number;
-  changePct: number; // 0.0123 => 1.23%
-  week52High?: number;
-  allTimeHigh?: number;
-  pe?: number;
-  fwdPe?: number;
+  lastPrice: number | null;
+  changeAbs: number | null;
+  changePct: number | null; // 0.0123 => 1.23%
+  week52High: number | null;
+  allTimeHigh: number | null;
+  pe: number | null;
+  fwdPe: number | null;
 
   // position data
   quantity: number;
   avgPrice: number;
   costBasis: number; // quantity * avgPrice in currency
   marketValue: number; // quantity * lastPrice in currency
-  marketValuePctOfAssets: number; // 0..1 vs invested asset
+  marketValuePctOfAssets: number; // 0 to 1 vs invested asset
   unrealizedAbs: number;
-  unrealizedPct: number; // 0..1
+  unrealizedPct: number; // 0 to 1
 
-  notes?: string;
-  rating?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+  notes: string | null;
+  rating?: number | null;
 };
 
 export type CategoryGoal = {
-  shortTermPct?: number; // target of invested asset, 0..1
+  shortTermPct?: number; // target of invested asset, 0 to 1
   midTermPct?: number;
   longTermPct?: number;
 };
@@ -50,7 +55,7 @@ export type CategoryGoal = {
 export type CategorySummary = {
   category: HoldingCategory;
   totalMarketValue: number;
-  pctOfInvested: number; // 0..1
+  pctOfInvested: number; // 0 to 1
   goals?: CategoryGoal;
 };
 

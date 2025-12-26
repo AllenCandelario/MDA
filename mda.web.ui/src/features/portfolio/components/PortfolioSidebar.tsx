@@ -7,12 +7,12 @@ function moneyNoSymbol(n?: number) {
 }
 
 export default function PortfolioSidebar() {
-  const { summary, dividendsToBePaid } = usePortfolioSummary();
+  const { summary, loading, error } = usePortfolioSummary();
 
   return (
     <aside className="w-full lg:w-80 xl:w-96 space-y-2">
       <div className="rounded-2xl bg-white p-4 shadow-sm space-y-1 mr-5 ">
-        <SidebarMetric label="Account" value={summary?.accountId ?? "—"} />
+        <SidebarMetric label="Account" value={summary?.ibkrAccountId ?? "—"} />
 
         <SidebarMetric label="Total amount" value={moneyNoSymbol(summary?.totalPortfolioValue)} />
         <div className="mt-1 space-y-1 pl-3 border-l">
@@ -25,17 +25,17 @@ export default function PortfolioSidebar() {
         </div>
 
         <div className="pt-2" />
-        <SidebarMetric label="Unrealized P&L" value={moneyNoSymbol(summary?.unrealizedPnL)} />
+        <SidebarMetric label="Unrealized P&L" value={moneyNoSymbol(summary?.unrealizedPnl)} />
         <div className="mt-1 space-y-1 pl-3 border-l">
             <SidebarMetric label="Daily P&L" value={moneyNoSymbol(summary?.dailyPnL)} />
         </div>
 
-        <div className="pt-2" />
+        {/* <div className="pt-2" />
         <SidebarMetric label="Dividends (year)" value={moneyNoSymbol(summary?.expectedDividendsYear)} />
         <div className="mt-1 space-y-1 pl-3 border-l">
           <SidebarMetric label="Dividends paid out" value={moneyNoSymbol(summary?.dividendsPaidYtd)} />
           <SidebarMetric label="Dividends to be paid out" value={moneyNoSymbol(dividendsToBePaid)} />
-        </div>
+        </div> */}
       </div>
     </aside>
   );

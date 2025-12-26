@@ -9,7 +9,7 @@ type SignalRContextValue = {
 
 const SignalRContext = createContext<SignalRContextValue | undefined>(undefined);
 
-export function SignalRProvider( { children }: { children: ReactNode }) {
+export function SignalRProvider({ children }: { children: ReactNode }) {
     const [connection] = useState<HubConnection>(() => createHubConnection());
     const [isConnected, setIsConnected] = useState(false);
 

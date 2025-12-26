@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Holding, CategorySummary, HoldingCategory } from "../types";
+import type { Holding, CategorySummary, HoldingCategory, Holdings } from "../types";
+import { getFullHoldingDetails } from "../api/portfolioApi";
+import { useActiveAccount } from "../../../app/providers/ActiveAccountProvider";
 
 const CATEGORY_GOALS: Record<HoldingCategory, { shortTermPct?: number; midTermPct?: number; longTermPct?: number }> = {
   Semiconductor: { shortTermPct: 0.2375, midTermPct: 0.22, longTermPct: 0.20 },
@@ -7,79 +9,47 @@ const CATEGORY_GOALS: Record<HoldingCategory, { shortTermPct?: number; midTermPc
   Energy: {},
   ETF: {},
   Other: {},
+  Uncategorized: {}
 };
 
 export function useHoldings(investedAsset: number) {
+  const { active, isBootStrapping } = useActiveAccount();
   const [holdings, setHoldings] = useState<Holding[]>([]);
 
-  useEffect(() => {
-    // TODO: replace with real source. Mock holdings for now.
-    const h: Holding[] = [
-      {
-        symbol: "NVDA",
-        name: "NVIDIA Corp",
-        currency: "USD",
-        category: "Semiconductor",
-        lastPrice: 120.12,
-        changeAbs: 2.35,
-        changePct: 0.0201,
-        week52High: 135.2,
-        allTimeHigh: 150.0,
-        pe: 70.5,
-        fwdPe: 40.2,
-        quantity: 50,
-        avgPrice: 95.0,
-        costBasis: 50 * 95,
-        marketValue: 50 * 120.12,
-        marketValuePctOfAssets: 0, // set below when investedAsset is known
-        unrealizedAbs: 50 * (120.12 - 95),
-        unrealizedPct: (120.12 - 95) / 95,
-        notes: "Core AI position",
-        rating: 5,
-      },
-      {
-        symbol: "AMD",
-        name: "Advanced Micro Devices",
-        currency: "USD",
-        category: "Semiconductor",
-        lastPrice: 65.33,
-        changeAbs: -0.41,
-        changePct: -0.0062,
-        week52High: 77.9,
-        allTimeHigh: 90.0,
-        pe: 45.1,
-        fwdPe: 31.5,
-        quantity: 80,
-        avgPrice: 58.0,
-        costBasis: 80 * 58,
-        marketValue: 80 * 65.33,
-        marketValuePctOfAssets: 0, // set below
-        unrealizedAbs: 80 * (65.33 - 58),
-        unrealizedPct: (65.33 - 58) / 58,
-        notes: "",
-        rating: 4,
-      },
-    ];
-    setHoldings(h);
-  }, []);
+  const [error, setError] = useState<unknown>(null);
+  const [loading, setLoading] = useState(false);
 
-  const enriched = useMemo(() => {
-    if (!investedAsset || investedAsset <= 0) return holdings;
-    return holdings.map(h => ({
-      ...h,
-      marketValuePctOfAssets: h.marketValue / investedAsset,
-    }));
-  }, [holdings, investedAsset]);
+  useEffect(() => {
+    if (isBootStrapping || !active) return;
+    load();
+  }, [active, isBootStrapping]);
+
+  const load = async () => {
+      setLoading(true);
+      setError(false);
+  
+      try {
+        if (active?.id == null || active.id == undefined) {
+          return;
+        }
+        const holdingsResponse = await getFullHoldingDetails(active.id)
+        setHoldings(holdingsResponse.holdings);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+  }
 
   const byCategory = useMemo(() => {
     const map = new Map<string, Holding[]>();
-    for (const h of enriched) {
+    for (const h of holdings) {
       const arr = map.get(h.category) ?? [];
       arr.push(h);
       map.set(h.category, arr);
     }
     return map;
-  }, [enriched]);
+  }, [holdings]);
 
   const categorySummaries: CategorySummary[] = useMemo(() => {
     const out: CategorySummary[] = [];
@@ -92,5 +62,5 @@ export function useHoldings(investedAsset: number) {
     return out;
   }, [byCategory, investedAsset]);
 
-  return { holdings: enriched, byCategory, categorySummaries };
+  return { holdings, byCategory, categorySummaries };
 }

@@ -1,36 +1,36 @@
 import { useEffect, useState } from "react";
 import type { PortfolioSummary } from "../types";
+import { getPortfolioSummaryByAccountId } from "../api/portfolioApi";
+import { useActiveAccount } from "../../../app/providers/ActiveAccountProvider";
 
 export function usePortfolioSummary() {
+  const { active, isBootStrapping } = useActiveAccount();
   const [summary, setSummary] = useState<PortfolioSummary | null>(null);
 
+  const [error, setError] = useState<unknown>(null);
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
-    // TODO: replace with real data source (REST/SignalR). Mock for now.
-    const total = 125000;
-    const settled = 30000;
-    const dailyPnL = 420; // +$420 today
-    const unrealized = 7850;
-    const expectedDivYr = 2600;
-    const paidYtd = 1900;
+    if (isBootStrapping || !active) return;
+    load();
+  }, [active, isBootStrapping]);
 
-    const mock: PortfolioSummary = {
-      accountId: "DU1234567",
-      totalPortfolioValue: total,
-      settledCash: settled,
-      excessLiquidity: 55000,
-      buyingPower: 220000,
-      investedAsset: total - settled,
-      dailyPnL,
-      unrealizedPnL: unrealized,
-      expectedDividendsYear: expectedDivYr,
-      dividendsPaidYtd: paidYtd,
-    };
-    setSummary(mock);
-  }, []);
+  const load = async () => {
+    setLoading(true);
+    setError(false);
 
-  const dividendsToBePaid = summary
-    ? summary.expectedDividendsYear - summary.dividendsPaidYtd
-    : 0;
+    try {
+      if (active?.id == null || active.id == undefined) {
+        return;
+      }
+      const portfolioSummaryResponse = await getPortfolioSummaryByAccountId(active.id)
+      setSummary(portfolioSummaryResponse);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  return { summary, dividendsToBePaid };
+  return { summary, loading, error };
 }
