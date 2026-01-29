@@ -19,6 +19,12 @@ namespace MDA.Web.Infrastructure.Persistence.Repositories
             return await _db.Accounts.SingleOrDefaultAsync(a => a.IbkrAccountId == ibkrAccountId);
         }
 
+        public async Task<Account?> GetByIbkrAccountIdIncludeHoldingsAsync(string ibkrAccountId, CancellationToken ct)
+        {
+            return await _db.Accounts.Include(a => a.Holdings).SingleOrDefaultAsync(a => a.IbkrAccountId == ibkrAccountId);
+        }
+
+
         public async Task<Account?> GetByIdAsync(Guid accountId, CancellationToken ct)
         {
             return await _db.Accounts.SingleOrDefaultAsync(a => a.Id == accountId, ct);

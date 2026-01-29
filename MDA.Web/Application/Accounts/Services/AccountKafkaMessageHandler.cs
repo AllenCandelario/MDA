@@ -147,7 +147,7 @@ namespace MDA.Web.Application.Accounts.Services
                 return;
             }
 
-            var account = await _accountRepository.GetByIbkrAccountIdAsync(ibUpdatePortfolio.AccountName, ct);
+            var account = await _accountRepository.GetByIbkrAccountIdIncludeHoldingsAsync(ibUpdatePortfolio.AccountName, ct);
             if (account == null)
             {
                 // TODO: Proper logging
