@@ -5,6 +5,7 @@ using MDA.Web.Application.Instruments.Interfaces;
 using MDA.Web.Application.Shared;
 using MDA.Web.Domain.Accounts;
 using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json.Linq;
 using System.Text.Json;
 
 namespace MDA.Web.Application.Instruments.Services
@@ -156,9 +157,10 @@ namespace MDA.Web.Application.Instruments.Services
                 return;
             }
 
-
             var dict = ParseKeyValue(raw);
             decimal? pe = null;
+            decimal? forwardEpsDecimal = null;
+            decimal? priceDecimal = null;
             decimal? forwardPe = null;
 
             if (!dict.TryGetValue("PEEXCLXOR", out var peRaw))
@@ -167,10 +169,7 @@ namespace MDA.Web.Application.Instruments.Services
             }
             else
             {
-                if (decimal.TryParse(peRaw, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var peDecimal))
-                {
-                    pe = peDecimal;
-                }
+                pe = ParseReutersNullableDecimal(peRaw);
             }
 
             if (!dict.TryGetValue("AFEEPSNTM", out var forwardEpsRaw) || !dict.TryGetValue("NPRICE", out var priceRaw))
@@ -179,21 +178,18 @@ namespace MDA.Web.Application.Instruments.Services
             }
             else
             {
-                if (decimal.TryParse(forwardEpsRaw, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var forwardEpsDecimal) && decimal.TryParse(priceRaw, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var priceDecimal))
+
+                forwardEpsDecimal = ParseReutersNullableDecimal(forwardEpsRaw);
+                priceDecimal = ParseReutersNullableDecimal(priceRaw);
+                if (forwardEpsDecimal != null && priceDecimal != null && forwardEpsDecimal > 0m && priceDecimal > 0m)
                 {
-                    // guard against 0 or -99999.99 values 
-                    if (forwardEpsDecimal > 0m && priceDecimal > 0m && forwardEpsDecimal != -99999.99m && priceDecimal != -99999.99m)
-                    {
-                        forwardPe = decimal.Round(priceDecimal / forwardEpsDecimal, 8, MidpointRounding.AwayFromZero);
-                    }
+                    forwardPe = decimal.Round(priceDecimal.Value / forwardEpsDecimal.Value, 8, MidpointRounding.AwayFromZero);
                 }
+                
             }
 
-            if (pe.HasValue || forwardPe.HasValue)
-            {
-                instrument.UpdatePeRatios(pe, forwardPe);
-                await _instrumentRepository.SaveChangesAsync(ct);
-            }
+            instrument.UpdatePeRatios(pe, forwardPe);
+            await _instrumentRepository.SaveChangesAsync(ct);
         }
 
         /* Method to split raw string for ticker 47
@@ -222,6 +218,29 @@ namespace MDA.Web.Application.Instruments.Services
             }
 
             return dict;
+        }
+
+        // IBKR utilizes data from retuers for fundamental data like p/e ratios. Missing data will result in -99999.99 values, so we need to handle it
+        private static decimal? ParseReutersNullableDecimal(string s)
+        {
+            s = s.Trim();
+
+            if (string.IsNullOrWhiteSpace(s))
+            {
+                return null;
+            }
+
+            if (s == "-99999.99" || s == "-99999.9" || s == "N/A")
+            {
+                return null;
+            }
+
+            if (decimal.TryParse(s, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out var val))
+            {
+                return val;
+            }
+
+            return null;
         }
     }
 }

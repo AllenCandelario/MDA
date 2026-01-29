@@ -48,8 +48,8 @@ namespace MDA.Web.Domain.Instruments
         // PEs may be nullable
         public void UpdatePeRatios(decimal? pe, decimal? forwardPe)
         {
-            if (pe.HasValue) Pe = pe.Value;
-            if (forwardPe.HasValue) ForwardPe = forwardPe.Value;
+            Pe = pe;
+            ForwardPe = forwardPe;
         }
 
         public void UpdateATH(decimal ath)

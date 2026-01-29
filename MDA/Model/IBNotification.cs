@@ -3,6 +3,7 @@
 /*
     DECISIONS:
     - Use of class (sealed + record) because of the strings requirement for error messages
+    - We use 1 model to capture all the different event types instead of an abstract record like IBAccountUpdate because it's generic enough
 
     FUTURE IMPROVEMENTS:
 */

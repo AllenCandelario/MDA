@@ -49,6 +49,10 @@ namespace MDA.App.Service.AccountUpdate
                         : "SMART")
             };
 
+            /* Refer to IBKR or API docs for more info on the numbers, but they're requests for additional information
+                165 = 13, 26, 52 week low and highs. Currently using it for 52 week high
+                258 = Fundamental ratios. Currently using it to get p/e and forward p/e
+            */
             var reqId = _ib.SubscribeToMarketData(mdContract, "165,258");
 
             return Task.CompletedTask;
